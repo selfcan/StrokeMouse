@@ -3,7 +3,7 @@ import Foundation
 
 /// Live drawing feedback state. Independent of end-of-stroke acceptance.
 enum LiveViabilityState: String, Equatable, Sendable {
-    /// Path is still short or shape-similar to at least one candidate.
+    /// Path is still short, hopeful, or already matches at least one candidate.
     case viable
     /// Path is long enough and no longer resembles any candidate with hope.
     case unlikely
@@ -11,9 +11,10 @@ enum LiveViabilityState: String, Equatable, Sendable {
 
 /// Pure live-viability scoring for in-progress drawn strokes.
 ///
-/// Uses shape-only similarity (ignores most structural hard rejects) so
-/// incomplete but correct prefixes stay viable. End-of-stroke recognition
-/// still uses `GestureRecognitionEvaluator` unchanged.
+/// Uses optimistic similarity: raw shape keeps incomplete prefixes hopeful,
+/// while a structurally compatible path also uses the canonical score that
+/// end-of-stroke recognition would see. Final acceptance still remains in
+/// `GestureRecognitionEvaluator`.
 enum LiveGestureViability {
     struct Hysteresis: Equatable, Sendable {
         var state: LiveViabilityState = .viable
@@ -47,30 +48,33 @@ enum LiveGestureViability {
         guard !preparedTemplates.isEmpty else { return .unlikely }
 
         let preparedStroke = TemplateMatcher.prepare(path)
-        var bestShape = 0.0
-        var sawNonTerminalOverrun = false
+        var bestHopeScore = 0.0
+        var hasRecoverableCandidate = false
 
         for template in preparedTemplates {
             let match = TemplateMatcher.evaluate(
                 stroke: preparedStroke,
                 template: template
             )
-            if match.shapeScore > bestShape {
-                bestShape = match.shapeScore
-            }
+            // Raw shape keeps incomplete prefixes hopeful. Once structure is
+            // compatible, also honor the canonical score used at release time.
+            bestHopeScore = max(
+                bestHopeScore,
+                max(match.shapeScore, match.score)
+            )
             // terminalOverrun is the one structural miss that is irreversible
             // mid-stroke (path already overshot the template end).
             if match.structuralMismatch != .terminalOverrun {
-                sawNonTerminalOverrun = true
+                hasRecoverableCandidate = true
             }
         }
 
-        if !sawNonTerminalOverrun {
+        if !hasRecoverableCandidate {
             return .unlikely
         }
 
         let hope = hopeThreshold(matchThreshold: matchThreshold)
-        return bestShape >= hope ? .viable : .unlikely
+        return bestHopeScore >= hope ? .viable : .unlikely
     }
 
     /// Debounce viable → unlikely; recover to viable immediately when hope returns.

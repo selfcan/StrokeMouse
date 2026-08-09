@@ -86,6 +86,55 @@ final class LiveGestureViabilityTests: XCTestCase {
         XCTAssertEqual(state, .unlikely)
     }
 
+    func testFinalAcceptedSingleTurnRedrawNeverTurnsLiveFeedbackUnlikely() {
+        let template = Self.polyline([
+            CGPoint(x: 0, y: 0),
+            CGPoint(x: 200, y: 400),
+            CGPoint(x: 400, y: 0),
+        ])
+        let preparedTemplate = TemplateMatcher.prepare(template)
+        let redraw = [
+            CGPoint(x: 0, y: 0),
+            CGPoint(x: 50, y: 100),
+            CGPoint(x: 100, y: 200),
+            CGPoint(x: 150, y: 300),
+            CGPoint(x: 200, y: 400),
+            CGPoint(x: 220, y: 360),
+            CGPoint(x: 240, y: 320),
+            CGPoint(x: 260, y: 280),
+            CGPoint(x: 280, y: 240),
+        ]
+        let profile = GestureProfile(
+            name: "Single turn",
+            pattern: .freePath(template.map(CodablePoint.init))
+        )
+        let policy = GestureRecognitionPolicy(
+            minimumPathLength: 0,
+            matchThreshold: Constants.freePathMatchThreshold
+        )
+        let finalEvaluation = GestureRecognitionEvaluator.evaluateDrawn(
+            path: redraw,
+            profiles: [profile],
+            policy: policy
+        )
+        XCTAssertEqual(finalEvaluation.decision, .accepted)
+
+        var hysteresis = LiveGestureViability.Hysteresis()
+        for pathCount in [2, 5, 9] {
+            let observed = LiveGestureViability.evaluate(
+                path: Array(redraw.prefix(pathCount)),
+                preparedTemplates: [preparedTemplate],
+                minimumPathLength: policy.minimumPathLength,
+                matchThreshold: policy.matchThreshold
+            )
+            hysteresis = LiveGestureViability.applyHysteresis(
+                current: hysteresis,
+                observed: observed
+            )
+        }
+        XCTAssertEqual(hysteresis.state, .viable)
+    }
+
     func testHysteresisRequiresConsecutiveUnlikelyEvals() {
         var h = LiveGestureViability.Hysteresis()
         h = LiveGestureViability.applyHysteresis(
@@ -132,6 +181,22 @@ final class LiveGestureViabilityTests: XCTestCase {
     private static func horizontalLine(length: CGFloat) -> [CGPoint] {
         (0...12).map { i in
             CGPoint(x: length * CGFloat(i) / 12, y: 0)
+        }
+    }
+
+    private static func polyline(
+        _ vertices: [CGPoint],
+        samplesPerSegment: Int = 20
+    ) -> [CGPoint] {
+        guard let first = vertices.first else { return [] }
+        return [first] + zip(vertices, vertices.dropFirst()).flatMap { start, end in
+            (1...samplesPerSegment).map { index in
+                let progress = CGFloat(index) / CGFloat(samplesPerSegment)
+                return CGPoint(
+                    x: start.x + (end.x - start.x) * progress,
+                    y: start.y + (end.y - start.y) * progress
+                )
+            }
         }
     }
 }
