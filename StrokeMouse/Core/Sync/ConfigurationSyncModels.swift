@@ -4,6 +4,8 @@ enum SyncProviderKind: String, Codable, CaseIterable, Identifiable, Sendable {
     case githubGist
     case webDAV
 
+    static let defaultSelection = SyncProviderKind.webDAV
+
     var id: String { rawValue }
 }
 

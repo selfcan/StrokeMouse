@@ -3,7 +3,7 @@ import SwiftUI
 struct SyncSettingsView: View {
     @Environment(AppState.self) private var appState
 
-    @State private var provider = SyncProviderKind.githubGist
+    @State private var provider = SyncProviderKind.defaultSelection
     @State private var gistIDOrURL = ""
     @State private var webDAVURL = ""
     @State private var webDAVUsername = ""

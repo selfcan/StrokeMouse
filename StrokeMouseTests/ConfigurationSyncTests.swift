@@ -4,6 +4,10 @@ import XCTest
 
 @MainActor
 final class ConfigurationSyncTests: XCTestCase {
+    func testDefaultProviderSelectionIsWebDAV() {
+        XCTAssertEqual(SyncProviderKind.defaultSelection, .webDAV)
+    }
+
     func testSavingConnectionPreflightsRecoveryBeforePersistingCredentials() async throws {
         let harness = try makeHarness()
         defer { harness.cleanup() }
