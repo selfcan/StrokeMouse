@@ -13,6 +13,13 @@ final class AppState {
     let actionExecutor: ActionExecutor
     let gestureRuntime: GestureRuntime
     let updaterService: UpdaterService
+    @ObservationIgnored
+    lazy var configurationSync = ConfigurationSync(
+        configStore: configStore,
+        applyConfiguration: { [weak self] in
+            try self?.applyRestoredConfiguration()
+        }
+    )
     private var gestureConfigurationRevision: UInt64 = 0
 
     var showOnboarding: Bool
@@ -66,8 +73,14 @@ final class AppState {
 
         // ConfigStore notifies only after validation + durable persistence.
         configStore.onGesturesChanged = { [weak self] in
-            self?.applyCurrentGestureConfiguration()
+            guard let self,
+                  !self.configurationSync.isApplyingLocalRestore
+            else { return }
+            self.applyCurrentGestureConfiguration()
+            self.configurationSync.noteLocalConfigurationChanged()
         }
+
+        configurationSync.activate()
 
         applyLaunchPreferences()
         syncMenuBarExtraInserted()
@@ -276,12 +289,27 @@ final class AppState {
     func applyCurrentGestureConfiguration(
         enabledOverride: Bool? = nil
     ) {
+        let configuration = makeGestureRuntimeConfiguration(
+            enabledOverride: enabledOverride
+        )
+        do {
+            try gestureRuntime.apply(configuration)
+        } catch {
+            assertionFailure(
+                "Persisted gesture configuration was rejected: \(error)"
+            )
+        }
+    }
+
+    private func makeGestureRuntimeConfiguration(
+        enabledOverride: Bool?
+    ) -> GestureRuntimeConfiguration {
         gestureConfigurationRevision &+= 1
         let defaults = UserDefaults.standard
         let storedDistance = defaults.double(
             forKey: PreferenceKey.minStrokeDistance
         )
-        let configuration = GestureRuntimeConfiguration(
+        return GestureRuntimeConfiguration(
             revision: gestureConfigurationRevision,
             isEnabled: enabledOverride
                 ?? defaults.bool(forKey: PreferenceKey.gesturesEnabled),
@@ -301,13 +329,23 @@ final class AppState {
                 forKey: PreferenceKey.directTrackpadEnabled
             )
         )
-        do {
-            try gestureRuntime.apply(configuration)
-        } catch {
-            assertionFailure(
-                "Persisted gesture configuration was rejected: \(error)"
+    }
+
+    /// Re-applies every portable setting after an atomic backup restore.
+    /// Unlike ordinary preference changes, a runtime rejection is propagated so
+    /// ConfigurationSync can compensate from its rollback snapshot.
+    private func applyRestoredConfiguration() throws {
+        try gestureRuntime.apply(
+            makeGestureRuntimeConfiguration(enabledOverride: nil)
+        )
+        applyLanguage()
+        applyAppearance()
+        updateGestureHUDCapture(
+            UserDefaults.standard.bool(
+                forKey: PreferenceKey.includeGestureHUDInCaptures
             )
-        }
+        )
+        refreshMenuBarIconStatus()
     }
 
     func applyAppearance() {
@@ -397,6 +435,7 @@ final class AppState {
 enum SettingsTab: String, Hashable, CaseIterable, Identifiable {
     case gestures
     case general
+    case sync
     case permissions
     case about
 
@@ -406,6 +445,7 @@ enum SettingsTab: String, Hashable, CaseIterable, Identifiable {
         switch self {
         case .gestures: return "tab.gestures"
         case .general: return "tab.general"
+        case .sync: return "tab.sync"
         case .permissions: return "tab.permissions"
         case .about: return "tab.about"
         }
@@ -415,6 +455,7 @@ enum SettingsTab: String, Hashable, CaseIterable, Identifiable {
         switch self {
         case .gestures: return "hand.draw"
         case .general: return "gearshape"
+        case .sync: return "arrow.triangle.2.circlepath"
         case .permissions: return "lock.shield"
         case .about: return "info.circle"
         }

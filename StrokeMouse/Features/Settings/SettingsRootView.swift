@@ -21,6 +21,12 @@ struct SettingsRootView: View {
                 }
                 .tag(SettingsTab.general)
 
+            SyncSettingsView()
+                .tabItem {
+                    Label(L10n.string("tab.sync"), systemImage: SettingsTab.sync.systemImage)
+                }
+                .tag(SettingsTab.sync)
+
             PermissionsSettingsView()
                 .tabItem {
                     Label(L10n.string("tab.permissions"), systemImage: SettingsTab.permissions.systemImage)

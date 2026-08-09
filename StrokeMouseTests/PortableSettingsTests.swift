@@ -1,0 +1,158 @@
+import XCTest
+@testable import StrokeMouse
+
+final class PortableSettingsTests: XCTestCase {
+    func testCaptureReadsOnlyThePortableWhitelist() throws {
+        let defaults = makeDefaults()
+        defer { clear(defaults) }
+        seedPortableValues(in: defaults)
+        defaults.set(false, forKey: PreferenceKey.gesturesEnabled)
+        defaults.set(false, forKey: PreferenceKey.automaticallyChecksForUpdates)
+        defaults.set(true, forKey: PreferenceKey.hideDockIcon)
+
+        let settings = PortableSettingsV1.capture(from: defaults)
+        let encoded = try JSONEncoder().encode(settings)
+        let keys = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+        ).keys
+
+        XCTAssertEqual(settings.minStrokeDistance, 75)
+        XCTAssertEqual(settings.matchThreshold, 0.77)
+        XCTAssertEqual(settings.appearance, AppearanceMode.dark.rawValue)
+        XCTAssertEqual(settings.language, LanguageOverride.english.rawValue)
+        XCTAssertEqual(
+            Set(keys),
+            Set([
+                "minStrokeDistance", "matchThreshold", "appearance",
+                "menuBarIconStyle", "language", "pinnedGestureAppBundleIds",
+                "showGestureHUD", "includeGestureHUDInCaptures",
+                "directTrackpadEnabled", "hudLineColor", "hudLineWidth",
+                "hudShowStartPoint", "hudStartPointRadius", "showMatchToast",
+                "showMissToast", "showLiveMismatchFeedback",
+                "hudMismatchLineColor",
+            ])
+        )
+        XCTAssertFalse(keys.contains("gesturesEnabled"))
+        XCTAssertFalse(keys.contains("automaticallyChecksForUpdates"))
+        XCTAssertFalse(keys.contains("hideDockIcon"))
+    }
+
+    func testApplyWritesPortableValuesAndPreservesDeviceLocalSettings() throws {
+        let source = makeDefaults()
+        let destination = makeDefaults()
+        defer {
+            clear(source)
+            clear(destination)
+        }
+        seedPortableValues(in: source)
+        destination.set(true, forKey: PreferenceKey.gesturesEnabled)
+        destination.set(false, forKey: PreferenceKey.automaticallyChecksForUpdates)
+        destination.set(true, forKey: PreferenceKey.hideMenuBarIcon)
+        destination.set(true, forKey: PreferenceKey.acceptedExperimentalTrackpadRisk)
+
+        try PortableSettingsV1.capture(from: source).apply(to: destination)
+        let applied = PortableSettingsV1.capture(from: destination)
+
+        XCTAssertEqual(applied, PortableSettingsV1.capture(from: source))
+        XCTAssertTrue(destination.bool(forKey: PreferenceKey.gesturesEnabled))
+        XCTAssertFalse(destination.bool(
+            forKey: PreferenceKey.automaticallyChecksForUpdates
+        ))
+        XCTAssertTrue(destination.bool(forKey: PreferenceKey.hideMenuBarIcon))
+        XCTAssertTrue(destination.bool(
+            forKey: PreferenceKey.acceptedExperimentalTrackpadRisk
+        ))
+    }
+
+    func testValidationRunsBeforeAnyDefaultsMutation() throws {
+        let source = makeDefaults()
+        let destination = makeDefaults()
+        defer {
+            clear(source)
+            clear(destination)
+        }
+        seedPortableValues(in: source)
+        var invalid = PortableSettingsV1.capture(from: source)
+        invalid.hudLineWidth = 0
+        destination.set("sentinel", forKey: PreferenceKey.appearance)
+
+        XCTAssertThrowsError(try invalid.apply(to: destination)) { error in
+            XCTAssertEqual(
+                error as? PortableSettingsValidationError,
+                .invalidHUDLineWidth(0)
+            )
+        }
+        XCTAssertEqual(
+            destination.string(forKey: PreferenceKey.appearance),
+            "sentinel"
+        )
+        XCTAssertNil(destination.object(forKey: PreferenceKey.minStrokeDistance))
+    }
+
+    func testValidationRejectsDuplicatePinnedAppsAndInvalidEnums() {
+        let defaults = makeDefaults()
+        defer { clear(defaults) }
+        var settings = PortableSettingsV1.capture(from: defaults)
+        settings.pinnedGestureAppBundleIds = ["com.apple.Safari", "com.apple.Safari"]
+
+        XCTAssertThrowsError(try settings.validate()) { error in
+            XCTAssertEqual(
+                error as? PortableSettingsValidationError,
+                .duplicatePinnedBundleIdentifier("com.apple.Safari")
+            )
+        }
+
+        settings.pinnedGestureAppBundleIds = []
+        settings.language = "not-a-language"
+        XCTAssertThrowsError(try settings.validate()) { error in
+            XCTAssertEqual(
+                error as? PortableSettingsValidationError,
+                .invalidLanguage("not-a-language")
+            )
+        }
+    }
+
+    private func makeDefaults() -> UserDefaults {
+        UserDefaults(suiteName: "PortableSettingsTests-\(UUID().uuidString)")!
+    }
+
+    private func clear(_ defaults: UserDefaults) {
+        if let name = defaults.volatileDomainNames.first(where: {
+            $0.hasPrefix("PortableSettingsTests-")
+        }) {
+            defaults.removePersistentDomain(forName: name)
+        }
+        for key in defaults.dictionaryRepresentation().keys {
+            defaults.removeObject(forKey: key)
+        }
+    }
+
+    private func seedPortableValues(in defaults: UserDefaults) {
+        defaults.set(75.0, forKey: PreferenceKey.minStrokeDistance)
+        defaults.set(0.77, forKey: PreferenceKey.matchThreshold)
+        defaults.set(AppearanceMode.dark.rawValue, forKey: PreferenceKey.appearance)
+        defaults.set(
+            MenuBarIconStyle.color.rawValue,
+            forKey: PreferenceKey.menuBarIconStyle
+        )
+        defaults.set(
+            LanguageOverride.english.rawValue,
+            forKey: PreferenceKey.language
+        )
+        defaults.set(
+            ["com.apple.Safari", "com.apple.Terminal"],
+            forKey: PreferenceKey.pinnedGestureAppBundleIds
+        )
+        defaults.set(false, forKey: PreferenceKey.showGestureHUD)
+        defaults.set(true, forKey: PreferenceKey.includeGestureHUDInCaptures)
+        defaults.set(false, forKey: PreferenceKey.directTrackpadEnabled)
+        defaults.set("#112233FF", forKey: PreferenceKey.hudLineColor)
+        defaults.set(6.0, forKey: PreferenceKey.hudLineWidth)
+        defaults.set(false, forKey: PreferenceKey.hudShowStartPoint)
+        defaults.set(9.0, forKey: PreferenceKey.hudStartPointRadius)
+        defaults.set(false, forKey: PreferenceKey.showMatchToast)
+        defaults.set(false, forKey: PreferenceKey.showMissToast)
+        defaults.set(true, forKey: PreferenceKey.showLiveMismatchFeedback)
+        defaults.set("#AABBCCDD", forKey: PreferenceKey.hudMismatchLineColor)
+    }
+}

@@ -199,6 +199,48 @@ final class ConfigStore {
         commit(DefaultGestures.make())
     }
 
+    // MARK: - Whole-library backup
+
+    /// Returns the complete gesture library in its persisted wire shape.
+    /// Unlike selection export, an empty library is a valid backup.
+    func makeBackupGestureFile() throws -> GestureConfigFile {
+        guard !requiresRecovery else {
+            throw ConfigStoreFailure.recoveryRequired
+        }
+        do {
+            try validate(gestures)
+            return GestureConfigFile(
+                version: Constants.configVersion,
+                gestures: gestures
+            )
+        } catch {
+            throw recordFailure(error)
+        }
+    }
+
+    /// Validates a backup without mutating the store or its error state.
+    func validateBackupGestureFile(_ file: GestureConfigFile) throws {
+        guard file.version == Constants.configVersion else {
+            throw ConfigStoreFailure.unsupportedVersion(file.version)
+        }
+        try validate(file.gestures)
+    }
+
+    /// Atomically replaces the complete gesture library from a backup.
+    /// UUIDs and ordering are preserved exactly; an empty library is valid.
+    func replaceFromBackup(_ file: GestureConfigFile) throws {
+        guard !requiresRecovery else {
+            throw ConfigStoreFailure.recoveryRequired
+        }
+        try validateBackupGestureFile(file)
+        do {
+            try persist(file.gestures)
+            publish(file.gestures)
+        } catch {
+            throw recordFailure(error)
+        }
+    }
+
     /// Replaces an unreadable/unsupported config only after preserving its
     /// exact bytes in a uniquely named, non-overwriting recovery copy.
     @discardableResult
@@ -433,11 +475,13 @@ final class ConfigStore {
         }
     }
 
-    private func recordFailure(_ error: Error) {
+    @discardableResult
+    private func recordFailure(_ error: Error) -> ConfigStoreFailure {
         let failure = (error as? ConfigStoreFailure)
             ?? .persistenceFailed(error.localizedDescription)
         lastFailure = failure
         lastError = failure.localizedDescription
+        return failure
     }
 
     private func removeTemporaryItemIfPresent(at url: URL) {
@@ -564,6 +608,7 @@ private struct LegacyGestureProfile: Decodable {
 }
 
 enum ConfigStoreFailure: Error, Equatable, LocalizedError, Sendable {
+    case recoveryRequired
     case unsupportedVersion(Int)
     case decodeFailed(String)
     case invalidConfiguration(ConfigValidationFailure)
@@ -573,6 +618,8 @@ enum ConfigStoreFailure: Error, Equatable, LocalizedError, Sendable {
 
     var errorDescription: String? {
         switch self {
+        case .recoveryRequired:
+            return L10n.string("config.failure.recoveryRequired")
         case .unsupportedVersion(let version):
             return String(
                 format: L10n.string("config.failure.unsupportedVersion"),
