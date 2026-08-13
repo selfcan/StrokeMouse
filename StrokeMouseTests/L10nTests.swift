@@ -201,4 +201,146 @@ final class L10nTests: XCTestCase {
         }
         XCTAssertEqual(zip(english, chinese).filter { $0 == $1 }.count, 0)
     }
+
+    func testLanguageAllowlistIncludesSystemAndAllShippedLocales() {
+        XCTAssertEqual(
+            LanguageOverride.allCases.map(\.rawValue),
+            ["system", "en", "zh-Hans", "zh-Hant", "ko", "ja", "ru", "fr"]
+        )
+        XCTAssertEqual(
+            LanguageOverride.explicitCatalogLocales.map(\.rawValue),
+            ["en", "zh-Hans", "zh-Hant", "ko", "ja", "ru", "fr"]
+        )
+    }
+
+    func testPreferredLanguageMapsOntoSupportedCatalogLocales() {
+        let cases: [([String], String)] = [
+            (["zh-CN"], "zh-Hans"),
+            (["zh-SG"], "zh-Hans"),
+            (["zh-Hans"], "zh-Hans"),
+            (["zh-Hans-CN"], "zh-Hans"),
+            (["zh_CN"], "zh-Hans"),
+            (["zh-TW"], "zh-Hant"),
+            (["zh-HK"], "zh-Hant"),
+            (["zh-MO"], "zh-Hant"),
+            (["zh-Hant"], "zh-Hant"),
+            (["zh-Hant-TW"], "zh-Hant"),
+            (["zh_TW"], "zh-Hant"),
+            (["ja"], "ja"),
+            (["ja-JP"], "ja"),
+            (["ko"], "ko"),
+            (["ko-KR"], "ko"),
+            (["ru"], "ru"),
+            (["ru-RU"], "ru"),
+            (["fr"], "fr"),
+            (["fr-FR"], "fr"),
+            (["en"], "en"),
+            (["en-US"], "en"),
+            (["de-DE"], "en"),
+            (["de-DE", "fr-FR"], "fr"),
+            (["es-ES", "en-US"], "en"),
+        ]
+        for (preferred, expected) in cases {
+            XCTAssertEqual(
+                LanguageOverride.catalogLocale(matching: preferred),
+                expected,
+                "preferred \(preferred)"
+            )
+        }
+    }
+
+    func testSystemOverrideUsesPreferredLanguageResolver() {
+        XCTAssertEqual(
+            LanguageOverride.system.resolvedCatalogLocale(preferredLanguages: ["zh-TW", "en"]),
+            "zh-Hant"
+        )
+        XCTAssertEqual(
+            LanguageOverride.system.resolvedCatalogLocale(preferredLanguages: ["de-DE"]),
+            "en"
+        )
+        XCTAssertEqual(
+            LanguageOverride.english.resolvedCatalogLocale(preferredLanguages: ["ja"]),
+            "en"
+        )
+        XCTAssertEqual(
+            LanguageOverride.japanese.resolvedCatalogLocale(preferredLanguages: ["fr"]),
+            "ja"
+        )
+    }
+
+    func testExplicitLanguageOverridesResolveShippedCatalogStrings() {
+        let keys = [
+            "tab.gestures",
+            "general.enableGestures",
+            "general.language",
+        ]
+        let properNounAllowlist: Set<String> = ["StrokeMouse"]
+
+        L10n.apply(.english)
+        let english = Dictionary(uniqueKeysWithValues: keys.map { ($0, L10n.string($0)) })
+
+        for override in LanguageOverride.explicitCatalogLocales {
+            L10n.apply(override)
+            for key in keys {
+                let value = L10n.string(key)
+                XCTAssertFalse(value.isEmpty, "\(override.rawValue) empty for \(key)")
+                XCTAssertNotEqual(value, key, "\(override.rawValue) unresolved \(key)")
+                guard override != .english else { continue }
+                let englishValue = english[key] ?? ""
+                if properNounAllowlist.contains(englishValue) { continue }
+                XCTAssertNotEqual(
+                    value,
+                    englishValue,
+                    "\(override.rawValue) \(key) should differ from English"
+                )
+            }
+        }
+    }
+
+    func testLanguagePickerTitlesStayInTargetLanguageExceptSystem() {
+        let expectedNative: [LanguageOverride: String] = [
+            .english: "English",
+            .simplifiedChinese: "简体中文",
+            .traditionalChinese: "繁體中文",
+            .korean: "한국어",
+            .japanese: "日本語",
+            .russian: "Русский",
+            .french: "Français",
+        ]
+        XCTAssertEqual(
+            Set(expectedNative.keys),
+            Set(LanguageOverride.explicitCatalogLocales)
+        )
+
+        for ui in LanguageOverride.explicitCatalogLocales {
+            L10n.apply(ui)
+            for (lang, name) in expectedNative {
+                XCTAssertEqual(
+                    lang.pickerTitle,
+                    name,
+                    "\(lang.rawValue) under UI \(ui.rawValue)"
+                )
+            }
+            let systemTitle = LanguageOverride.system.pickerTitle
+            XCTAssertFalse(systemTitle.isEmpty)
+            XCTAssertNotEqual(systemTitle, LanguageOverride.system.displayKey)
+        }
+
+        L10n.apply(.english)
+        XCTAssertEqual(LanguageOverride.system.pickerTitle, "System")
+        L10n.apply(.simplifiedChinese)
+        XCTAssertEqual(LanguageOverride.system.pickerTitle, "跟随系统")
+    }
+
+    func testAppBundleShipsAllSupportedLocalizations() {
+        let shipped = Set(Bundle.main.localizations.map {
+            $0.replacingOccurrences(of: "_", with: "-")
+        })
+        for locale in LanguageOverride.explicitCatalogLocales.map(\.rawValue) {
+            XCTAssertTrue(
+                shipped.contains(locale),
+                "App bundle missing \(locale); have \(shipped.sorted())"
+            )
+        }
+    }
 }

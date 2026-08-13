@@ -274,7 +274,7 @@ struct GeneralSettingsView: View {
 
                 Picker(L10n.string("general.language"), selection: $languageRaw) {
                     ForEach(LanguageOverride.allCases) { lang in
-                        Text(L10n.string(lang.displayKey))
+                        Text(lang.pickerTitle)
                             .tag(lang.rawValue)
                     }
                 }

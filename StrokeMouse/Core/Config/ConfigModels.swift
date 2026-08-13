@@ -854,8 +854,124 @@ enum LanguageOverride: String, CaseIterable, Identifiable, Sendable {
     case system
     case english = "en"
     case simplifiedChinese = "zh-Hans"
+    case traditionalChinese = "zh-Hant"
+    case korean = "ko"
+    case japanese = "ja"
+    case russian = "ru"
+    case french = "fr"
 
     var id: String { rawValue }
 
     var displayKey: String { "language.\(rawValue)" }
+
+    /// Picker label. Explicit languages always use the target language's own
+    /// name; `.system` follows the current UI locale.
+    var pickerTitle: String {
+        switch self {
+        case .system:
+            return L10n.string(displayKey)
+        case .english:
+            return "English"
+        case .simplifiedChinese:
+            return "简体中文"
+        case .traditionalChinese:
+            return "繁體中文"
+        case .korean:
+            return "한국어"
+        case .japanese:
+            return "日本語"
+        case .russian:
+            return "Русский"
+        case .french:
+            return "Français"
+        }
+    }
+
+    /// Catalog locales the app ships (excludes `.system`).
+    static var explicitCatalogLocales: [LanguageOverride] {
+        allCases.filter { $0 != .system }
+    }
+
+    /// Resolves this override to a shipped catalog locale.
+    /// `.system` uses the given preferred-language list (defaults to the OS list).
+    func resolvedCatalogLocale(
+        preferredLanguages: [String] = Locale.preferredLanguages
+    ) -> String {
+        switch self {
+        case .system:
+            return Self.catalogLocale(matching: preferredLanguages)
+        default:
+            return rawValue
+        }
+    }
+
+    /// Maps an OS preferred-language list onto a supported catalog locale.
+    /// Unmatched lists fall back to English.
+    static func catalogLocale(matching preferredLanguages: [String]) -> String {
+        for identifier in preferredLanguages {
+            if let matched = matchPreferredLanguage(identifier) {
+                return matched
+            }
+        }
+        return english.rawValue
+    }
+
+    /// Matches a single BCP-47 / Apple language identifier to a catalog locale.
+    static func matchPreferredLanguage(_ identifier: String) -> String? {
+        let normalized = identifier.replacingOccurrences(of: "_", with: "-")
+        let parts = normalized.split(separator: "-").map(String.init)
+        guard let language = parts.first?.lowercased(), !language.isEmpty else {
+            return nil
+        }
+
+        switch language {
+        case "en":
+            return english.rawValue
+        case "ko":
+            return korean.rawValue
+        case "ja":
+            return japanese.rawValue
+        case "ru":
+            return russian.rawValue
+        case "fr":
+            return french.rawValue
+        case "zh":
+            return matchChinese(normalized: normalized, parts: parts)
+        default:
+            return nil
+        }
+    }
+
+    private static func matchChinese(normalized: String, parts: [String]) -> String {
+        let tokens = Set(parts.map { $0.lowercased() })
+        if tokens.contains("hant") {
+            return traditionalChinese.rawValue
+        }
+        if tokens.contains("hans") {
+            return simplifiedChinese.rawValue
+        }
+        if tokens.contains("tw") || tokens.contains("hk") || tokens.contains("mo") {
+            return traditionalChinese.rawValue
+        }
+        if tokens.contains("cn") || tokens.contains("sg") {
+            return simplifiedChinese.rawValue
+        }
+
+        let locale = Locale(identifier: normalized)
+        if let script = locale.language.script?.identifier.lowercased() {
+            if script == "hant" { return traditionalChinese.rawValue }
+            if script == "hans" { return simplifiedChinese.rawValue }
+        }
+        if let region = locale.region?.identifier.lowercased() {
+            if ["tw", "hk", "mo"].contains(region) {
+                return traditionalChinese.rawValue
+            }
+            if ["cn", "sg"].contains(region) {
+                return simplifiedChinese.rawValue
+            }
+        }
+
+        // Bare `zh` is treated as Simplified Chinese (Apple's common default).
+        return simplifiedChinese.rawValue
+    }
 }

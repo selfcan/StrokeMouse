@@ -110,6 +110,14 @@ final class PortableSettingsTests: XCTestCase {
                 .invalidLanguage("not-a-language")
             )
         }
+
+        for language in LanguageOverride.allCases {
+            settings.language = language.rawValue
+            XCTAssertNoThrow(
+                try settings.validate(),
+                "rejected shipped language \(language.rawValue)"
+            )
+        }
     }
 
     private func makeDefaults() -> UserDefaults {

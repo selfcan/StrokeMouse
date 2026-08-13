@@ -15,22 +15,36 @@ enum L10n {
         switch override {
         case .system:
             return .autoupdatingCurrent
-        case .english:
-            return Locale(identifier: "en")
-        case .simplifiedChinese:
-            return Locale(identifier: "zh-Hans")
+        default:
+            return Locale(identifier: override.rawValue)
         }
     }
 
     static func apply(_ newOverride: LanguageOverride) {
         override = newOverride
-        switch newOverride {
-        case .system:
-            stringsBundle = .main
-        case .english:
-            stringsBundle = lprojBundle(preferred: ["en", "en-US", "en-GB"]) ?? .main
-        case .simplifiedChinese:
-            stringsBundle = lprojBundle(preferred: ["zh-Hans", "zh_CN", "zh-Hans-CN", "zh"]) ?? .main
+        let catalog = newOverride.resolvedCatalogLocale()
+        stringsBundle = lprojBundle(preferred: lprojCandidates(for: catalog)) ?? .main
+    }
+
+    /// `.lproj` directory names to try for a catalog locale.
+    static func lprojCandidates(for catalogLocale: String) -> [String] {
+        switch catalogLocale {
+        case "en":
+            return ["en", "en-US", "en-GB"]
+        case "zh-Hans":
+            return ["zh-Hans", "zh_CN", "zh-Hans-CN", "zh"]
+        case "zh-Hant":
+            return ["zh-Hant", "zh_TW", "zh-Hant-TW", "zh-HK", "zh-Hant-HK"]
+        case "ko":
+            return ["ko", "ko-KR"]
+        case "ja":
+            return ["ja", "ja-JP"]
+        case "ru":
+            return ["ru", "ru-RU"]
+        case "fr":
+            return ["fr", "fr-FR"]
+        default:
+            return [catalogLocale]
         }
     }
 

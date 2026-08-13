@@ -1,200 +1,199 @@
+**English** · [简体中文](./README_zh-Hans.md) · [繁體中文](./README_zh-Hant.md) · [한국어](./README_ko.md) · [日本語](./README_ja.md) · [Русский](./README_ru.md) · [Français](./README_fr.md)
+
 <div align="center">
   <img src="design/logo/stroke-mouse-app-icon.png" width="128" alt="StrokeMouse" />
   <h1>StrokeMouse</h1>
-  <p>
-    <b>中文</b> · <a href="./README_EN.md">English</a>
-  </p>
   <p>
     <a href="./LICENSE"><img alt="License: AGPL-3.0" src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg" /></a>
   </p>
 </div>
 
-macOS 鼠标与触控板手势自定义工具。可按住鼠标键绘制轨迹、按住单个修饰键进行触控板绘制，也可使用实验性的多指触控手势；匹配后执行快捷键、打开应用、窗口操作、媒体键、Shell / AppleScript 等。支持**全局或指定 App** 生效，手势配置可**导入导出**，本地运行、菜单栏常驻。
+Custom mouse and trackpad gestures for macOS. Draw a stroke while holding a mouse button, draw with one modifier key (Trackpad Draw), or use experimental multi-finger Touch Gestures, then run shortcuts, open apps, window commands, media keys, Shell / AppleScript, and more. Gestures can be **global or app-scoped**, configs are **importable/exportable**, and everything runs locally from the menu bar.
 
-## 界面预览
+## Screenshots
 
-| 手势配置列表 | 手势测试 |
+| Gesture list | Gesture test |
 |:---:|:---:|
-| <img src="website/docs/public/screenshots/1.png" width="400" alt="手势配置列表" /> | <img src="website/docs/public/screenshots/2.png" width="400" alt="手势测试" /> |
+| <img src="website/docs/public/screenshots/1.png" width="400" alt="Gesture list" /> | <img src="website/docs/public/screenshots/2.png" width="400" alt="Gesture test" /> |
 
-| 通用设置 | 权限与引擎状态 |
+| General settings | Permissions |
 |:---:|:---:|
-| <img src="website/docs/public/screenshots/3.png" width="400" alt="通用设置" /> | <img src="website/docs/public/screenshots/4.png" width="400" alt="权限与引擎状态" /> |
+| <img src="website/docs/public/screenshots/3.png" width="400" alt="General settings" /> | <img src="website/docs/public/screenshots/4.png" width="400" alt="Permissions" /> |
 
-| 新建手势 · 录制轨迹 | 应用范围 |
+| Record stroke | App scope |
 |:---:|:---:|
-| <img src="website/docs/public/screenshots/5.png" width="400" alt="新建手势 · 录制轨迹" /> | <img src="website/docs/public/screenshots/6.png" width="400" alt="应用范围" /> |
+| <img src="website/docs/public/screenshots/5.png" width="400" alt="Record stroke" /> | <img src="website/docs/public/screenshots/6.png" width="400" alt="App scope" /> |
 
-## 功能
+## Features
 
-- **菜单栏常驻**：启停手势、打开设置、退出；图标随状态变色（正常 / 暂停 / 缺权限）；可**隐藏菜单栏图标**（与隐藏 Dock 同时开启会二次确认；隐藏后点 Dock 或再开 App 进入设置）
-- **手势库管理**：侧栏按**全局 / 各 App** 组织（新建时预填作用域）；搜索 / 筛选 / 排序；多选批量启停删除；**JSON 导入导出**（重复项可跳过或强制导入）
-- **鼠标绘制**：每条手势可独立选择右键、中键或侧键，只监听已启用配置用到的按钮
-- **触控板绘制**：按住一个 Fn / Control / Option / Shift / Command（默认 Fn）后移动指针绘制；必须精确按住单个支持键，额外修饰键会取消本次识别
-- **实验性触控手势**：内置触控板支持 34 类三至五指轻触 / 双击 / 四向滑动，以及二至五指捏合 / 张开 / 顺逆时针旋转
-- **触控手势总开关**：可随时关闭触控手势通道而不删除已配置手势；私有后端故障只降级触控通道，不影响鼠标与触控板绘制
-- **每条手势独立目标**：可选按下触发键时的当前前台应用或指针位置所属应用；若存在普通窗口则同时锁定精确窗口，应用范围判断与目标相关动作始终复用该目标
-- **自由轨迹识别**：有序弧长重采样 + 1D/2D 归一化 + 有限旋转；显著转折结构门控；可在通用设置调整全局匹配阈值；按住触发键时实时轨迹 HUD
-- **App 作用域**：全局，或从已安装应用中选图标添加（支持搜索 / 浏览 `.app`）
-- **多种动作**：快捷键、打开 / 切换 App、URL、媒体键、窗口操作、Shell / AppleScript（语法高亮；AppleScript 含睡眠、锁屏、清废纸篓等预设与自定义）
-- **体验**：中英界面、深浅色（跟随系统 / 强制）、登录启动、隐藏 Dock / 菜单栏图标、Sparkle 应用内更新（失败可回落 GitHub Releases）
+- **Menu bar app**: enable/disable gestures, open settings, quit; icon tints by status (normal / paused / needs permission); optional **hide menu bar icon** (confirm if Dock is also hidden; reopen via Dock or relaunch to open settings)
+- **Gesture library**: sidebar by **Global / per-app** (new gestures inherit the selected scope); search / filter / sort; multi-select batch enable, disable, delete; **JSON import/export** (skip or force-import duplicates)
+- **Mouse drawing**: each gesture can independently use the right, middle, or a side button; only buttons referenced by enabled profiles are monitored
+- **Trackpad Draw**: hold exactly one of Fn / Control / Option / Shift / Command (Fn by default) and move the pointer; pressing an additional supported modifier cancels that recognition attempt
+- **Experimental Touch Gestures**: the built-in trackpad supports 34 gesture classes—three- to five-finger taps, double taps, and four-way swipes, plus two- to five-finger pinches, spreads, and clockwise / counterclockwise rotations
+- **Touch Gestures master switch**: disable Touch Gestures without deleting configured gestures; private-backend failures degrade only the trackpad channel, leaving mouse and Trackpad Draw available
+- **Per-gesture target**: choose the frontmost app or the app under the pointer at trigger-down; when a regular window exists, its exact window is frozen too, and app-scope checks and target-aware actions always reuse that target
+- **Free-path recognition**: arc-length resampling + 1D/2D normalization + limited rotation; significant-turn structure gates; live stroke HUD while holding the trigger
+- **App scope**: global, or pick apps by icon from installed applications (search / browse `.app`)
+- **Actions**: shortcuts, open app (icon picker), URL, media keys, window actions, Shell / AppleScript (syntax-highlighted editor; AppleScript presets such as sleep, lock screen, empty trash, plus custom)
+- **Polish**: UI in English, Simplified Chinese, Traditional Chinese, Korean, Japanese, Russian, and French (or follow the system language), light/dark appearance (system or forced), launch at login, hide Dock / menu bar icon, Sparkle in-app updates (falls back to GitHub Releases on failure)
 
-## 系统要求
+## Requirements
 
-- macOS 14 Sonoma 或更高
-- Xcode 16+（开发构建）
-- 鼠标或触控板均可完成绘制手势；直接多指触控优先支持 Mac 内置触控板
-- 外接 Magic Trackpad 为 best-effort 支持，可能因机型或系统版本而异
+- macOS 14 Sonoma or later
+- Xcode 16+ (for development builds)
+- A mouse or trackpad can be used for drawn gestures; direct multi-touch primarily targets built-in Mac trackpads
+- External Magic Trackpad support is best effort and may vary by model or macOS release
 
-## 安装
+## Installation
 
-### Homebrew（推荐）
+### Homebrew (recommended)
 
-通过 StrokeMouse 项目维护的 [Licoy Homebrew Tap](https://github.com/Licoy/homebrew-tap) 安装：
+Install from the [project-maintained Licoy Homebrew Tap](https://github.com/Licoy/homebrew-tap):
 
 ```bash
 brew install --cask licoy/tap/strokemouse
 ```
 
-StrokeMouse 同时支持应用内更新；如希望通过 Homebrew 强制检查并升级，请使用：
+StrokeMouse also supports in-app updates. To force Homebrew to check and install an upgrade, use:
 
 ```bash
 brew upgrade --cask --greedy strokemouse
 ```
 
-卸载应用时默认保留配置，添加 `--zap` 可同时移除配置：
+Uninstalling keeps your settings by default. Add `--zap` to remove them as well:
 
 ```bash
 brew uninstall --cask strokemouse
 brew uninstall --cask --zap strokemouse
 ```
 
-也可前往 [官网下载页](https://strokemouse.com/download) 手动下载对应架构的 DMG。当前发行版使用固定自签代码签名且未经 Apple 公证；首次启动若被 Gatekeeper 阻止，请右键点按 App 并选择「打开」，或在「系统设置 → 隐私与安全性」中选择「仍要打开」。
+You can also download the DMG for your architecture from the [official download page](https://strokemouse.com/en/download). Current releases use a stable self-signed identity and are not Apple-notarized. If Gatekeeper blocks the first launch, right-click the app and choose Open, or use System Settings → Privacy & Security → Open Anyway.
 
-## 权限
+## Permissions
 
-| 权限 | 用途 |
-|------|------|
-| **辅助功能（Accessibility）** | 全局鼠标 / 修饰键事件监听（CGEventTap）、快捷键注入、窗口 AX 操作 |
-| **自动化（Automation）** | 可选；AppleScript 控制其他 App 时按需授权 |
+| Permission | Purpose |
+|------------|---------|
+| **Accessibility** | Global mouse / modifier listening (`CGEventTap`), shortcut injection, window AX actions |
+| **Automation** | Optional; required when AppleScript controls other apps |
 
-首次启动或 **设置 → 权限** 可使用应用内**引导授权**：打开系统设置并拖入 StrokeMouse 完成开关。未授权时引擎不会假装在监听。
+On first launch or **Settings → Permissions**, use in-app **Guide Me**: open System Settings and drag StrokeMouse into the list. Without trust the engine will not pretend to listen.
 
-### 实验性触控手势
+### Experimental Touch Gestures
 
-触控手势通过运行时 `dlopen` / `dlsym` 加载 Apple 未公开的 `MultitouchSupport`，不静态链接该私有框架。它可能在 macOS 更新后失效；缺少框架、符号、设备或设备启动失败都会显示为触控通道故障，鼠标与触控板绘制仍可继续使用，不会模拟回退或静默重试。
+Touch Gestures load Apple's undocumented `MultitouchSupport` at runtime through `dlopen` / `dlsym`; the private framework is not statically linked. It may stop working after a macOS update. A missing framework, symbol, device, or startup failure is shown as a trackpad-channel failure while mouse and Trackpad Draw continue to work—there is no simulated fallback or silent retry.
 
-StrokeMouse 不会拦截触控板原生事件，因此系统手势可能与绑定动作同时发生。应用也不会保存或记录原始触点轨迹。第一次保存、启用或导入已启用的触控手势配置时会显示实验风险确认；之后可用总开关暂停触控手势而不删除配置。
+StrokeMouse does not intercept native trackpad events, so a macOS system gesture may occur alongside the bound action. Raw touch trajectories are neither stored nor logged. The first attempt to enable, save, or import enabled Touch Gesture profiles shows an experimental-risk confirmation. The master switch can later pause Touch Gestures without deleting those profiles.
 
-支持的 34 类触控手势：
+The 34 supported Touch Gesture classes are:
 
-| 类别 | 手指数 | 变体 | 数量 |
-|------|--------|------|------|
-| 轻触 | 三 / 四 / 五指 | 单击、双击 | 6 |
-| 滑动 | 三 / 四 / 五指 | 上、下、左、右 | 12 |
-| 缩放 | 二 / 三 / 四 / 五指 | 捏合、张开 | 8 |
-| 旋转 | 二 / 三 / 四 / 五指 | 逆时针、顺时针 | 8 |
-| **合计** |  |  | **34** |
+| Family | Fingers | Variants | Count |
+|--------|---------|----------|-------|
+| Tap | Three / four / five | Single, double | 6 |
+| Swipe | Three / four / five | Up, down, left, right | 12 |
+| Scale | Two / three / four / five | Pinch, spread | 8 |
+| Rotate | Two / three / four / five | Counterclockwise, clockwise | 8 |
+| **Total** |  |  | **34** |
 
-首版不支持两指轻触 / 滑动、修饰键组合、特定手指身份、连续重复动作或用户调整识别阈值。
+The first release does not support two-finger taps / swipes, modifier combinations, specific finger identities, continuously repeated actions, or user-adjustable recognition thresholds.
 
-## 构建与运行
+## Build & run
 
-### 依赖
+### Dependencies
 
 ```bash
 brew install xcodegen
 ```
 
-### 生成工程并打开
+### Generate the project and open
 
 ```bash
 ./scripts/generate_project.sh
 open StrokeMouse.xcodeproj
 ```
 
-或在 Xcode 中直接 **Run**（Scheme: `StrokeMouse`）。
+Or **Run** directly in Xcode (Scheme: `StrokeMouse`).
 
-### 命令行构建（推荐）
+### CLI build (recommended)
 
-固定产出到仓库下 `output/StrokeMouse.app`，路径稳定，减少重复授权辅助功能。  
-Debug 显示名为 **StrokeMouse Dev**（Bundle ID `com.strokemouse.app.dev`），与正式版 **StrokeMouse** 可同时在辅助功能中授权，互不冲突：
+Produces a stable path at `output/StrokeMouse.app`, which reduces repeated Accessibility prompts.  
+Debug shows as **StrokeMouse Dev** (Bundle ID `com.strokemouse.app.dev`) so it can be authorized separately from the release **StrokeMouse** app:
 
 ```bash
-./scripts/build.sh           # Debug → output/StrokeMouse.app（辅助功能中显示 StrokeMouse Dev）
-./scripts/build.sh --open    # 编译完成后自动打开
-./scripts/build.sh --release # Release（显示名 / Bundle ID 与正式包一致）
+./scripts/build.sh           # Debug → output/StrokeMouse.app (Accessibility: StrokeMouse Dev)
+./scripts/build.sh --open    # open after build
+./scripts/build.sh --release # Release (same display name / Bundle ID as shipping builds)
 ```
 
-### 发布打包
+### Release packaging
 
-按架构生成 ZIP、TAR.GZ 和 DMG，并验证签名、entitlements 与产物完整性（默认用固定自签身份 **`StrokeMouse Release`**，便于辅助功能跨 Sparkle 更新保留）：
+Build ZIP, TAR.GZ, and DMG per architecture, and verify signature, entitlements, and artifact integrity:
 
 ```bash
-# 首次本地：./scripts/generate-codesign-cert.sh --import
+# First time locally: ./scripts/generate-codesign-cert.sh --import
 SPARKLE_PUBLIC_KEY="..." ARCH=arm64 ./scripts/package-app.sh
 SPARKLE_PUBLIC_KEY="..." ARCH=x86_64 ./scripts/package-app.sh
 ```
 
-发布与 CI secrets 说明见 `RELEASING.md` / `certs/README.md`。
+Release packaging uses the stable self-signed identity **`StrokeMouse Release`** so Accessibility grants survive Sparkle updates. See `RELEASING.md` / `certs/README.md`.
 
-版本发布使用 `./bump.sh -v x.y.z [-p]`；同版本重打 tag 并推送用 `./bump.sh -v x.y.z --force`。
+Bump versions with `./bump.sh -v x.y.z [-p]`. Re-tag the same version and push with `./bump.sh -v x.y.z --force`.
 
-### 测试
+### Tests
 
 ```bash
 xcodebuild -scheme StrokeMouse -configuration Debug test
 ```
 
-## 使用说明
+## Usage
 
-1. 启动应用，菜单栏出现鼠标图标  
-2. 授予 **辅助功能** 权限，并在菜单栏选择「恢复手势」/ 确认已启用  
-3. 打开 **设置 → 手势**，查看默认手势或新建  
-4. 选择一种输入方式：按住鼠标触发键绘制、按住单个修饰键进行触控板绘制，或完成已配置的触控手势
-5. 匹配成功后执行绑定动作  
+1. Launch the app; a mouse icon appears in the menu bar  
+2. Grant **Accessibility**, then enable gestures from the menu bar  
+3. Open **Settings → Gestures** to review defaults or create new ones  
+4. Choose an input: draw while holding a mouse trigger, Trackpad Draw while holding one modifier key, or perform a configured Touch Gesture
+5. On a successful match, the bound action runs  
 
-> **短按 vs 手势**：触发键的按下与松开由手势引擎暂时捕获；未达到「最小滑动距离」便松开时会回放为正常点击，右键菜单仍可用。所有鼠标移动与拖动事件都会直接交给系统更新光标，手势引擎通过定时采样记录轨迹；前台 App 收不到配对的触发键按下与松开，因此绘制时不会打开或选中右键菜单。左键和未配置为触发键的鼠标按钮不受影响。
+> **Short click vs gesture**: trigger down/up is temporarily captured by the engine. If you release before the minimum stroke distance, a normal click is replayed so the context menu still works. Once drawing starts, drag still moves the system cursor and stroke HUD, but the frontmost app does not receive a paired down/up—so no context menu appears or is selected. Left click and buttons not configured as triggers are always passed through.
 
-> **触控板绘制**：修饰键监听为 listen-only，不吞键盘事件；短路径不会执行动作。轨迹来自系统指针位置，因此可以用触控板或鼠标移动指针。StrokeMouse 不会阻止修饰键本身对当前 App 的影响。
+> **Trackpad Draw**: modifier monitoring is listen-only and never consumes keyboard events; a short path runs no action. The path follows the system pointer, so either a trackpad or mouse can move it. StrokeMouse does not suppress the modifier's normal effect in the active app.
 
-> 快捷键会先激活锁定应用；若锁定了精确窗口，也会将该窗口置前，因此可能切换焦点或桌面空间。Finder 桌面等没有普通窗口的位置仍可执行快捷键和「隐藏应用」；关闭、最小化、缩放、全屏、居中仍需要精确窗口。短按不会激活目标。
+> Shortcuts activate the frozen app first and also bring its exact window forward when one was captured, which may switch focus or Spaces. Locations without a regular window, such as the Finder desktop, can still run shortcuts and **Hide App**; Close, Minimize, Zoom, Full Screen, and Center still require an exact window. A short click never activates the target.
 
-默认手势示例（均默认右键触发；不同手势可绑定不同按键）：
+Default gesture examples (right button by default; each gesture can use a different button):
 
-| 手势 | 动作 |
-|------|------|
-| ↑ | Mission Control（⌃↑） |
-| ↓ | 应用程序窗口（⌃↓） |
-| ↓← | 最小化窗口 |
-| ↓→ | 关闭窗口 |
-| ↑→ | 打开 Safari |
-| →← | 播放 / 暂停 |
-| ↑← | 打开 GitHub |
+| Gesture | Action |
+|---------|--------|
+| ↑ | Mission Control (⌃↑) |
+| ↓ | Application windows (⌃↓) |
+| ↓← | Minimize window |
+| ↓→ | Close window |
+| ↑→ | Open Safari |
+| →← | Play / pause |
+| ↑← | Open GitHub |
 
-## 配置文件
+## Config file
 
-路径：
+Path:
 
 ```text
 ~/Library/Application Support/StrokeMouse/gestures.json
 ```
 
-日常可用 **设置 → 手势** 多选后导出 / 导入 JSON 包。整库可复制上述文件备份或手工编辑（需保持结构合法）。设置页可「在 Finder 中显示」。
+Day to day, multi-select under **Settings → Gestures** to export / import JSON packages. For a full-library backup, copy the file above or edit by hand (keep the structure valid). Settings can **Reveal in Finder**.
 
-## 技术栈
+## Tech stack
 
-- Swift / SwiftUI（macOS 14+）
-- 轻量 MVVM + Service
-- `CGEventTap` 全局鼠标 / 修饰键事件
-- `dlopen` / `dlsym` 动态加载 `MultitouchSupport`（实验性触控手势，不静态链接）
-- JSON 配置持久化
-- [LaunchAtLogin-Modern](https://github.com/sindresorhus/LaunchAtLogin-Modern) 登录启动
-- [Sparkle](https://github.com/sparkle-project/Sparkle) 签名校验与应用内更新
-- XcodeGen 管理工程
+- Swift / SwiftUI (macOS 14+)
+- Lightweight MVVM + Service
+- `CGEventTap` for global mouse / modifier events
+- Runtime `dlopen` / `dlsym` loading of `MultitouchSupport` for experimental Touch Gestures (no static link)
+- JSON config persistence
+- [LaunchAtLogin-Modern](https://github.com/sindresorhus/LaunchAtLogin-Modern) for login launch
+- [Sparkle](https://github.com/sparkle-project/Sparkle) for signed in-app updates
+- XcodeGen for the Xcode project
 
-## 许可与免责
+## License & disclaimer
 
-本项目采用 [GNU Affero General Public License v3.0 (AGPL-3.0)](./LICENSE) 开源。
+This project is licensed under the [GNU Affero General Public License v3.0 (AGPL-3.0)](./LICENSE).
 
-本地工具，全局事件与脚本动作具有系统级能力。请仅添加你信任的 Shell / AppleScript。作者不对误操作或权限滥用负责。
+This is a local utility. Global event monitoring and script actions are powerful. Only add Shell / AppleScript you trust. The author is not responsible for misuse or accidental damage.

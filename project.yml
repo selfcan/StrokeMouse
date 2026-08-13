@@ -9,6 +9,11 @@ options:
   knownRegions:
     - en
     - zh-Hans
+    - zh-Hant
+    - ko
+    - ja
+    - ru
+    - fr
     - Base
 settings:
   base:

@@ -173,11 +173,16 @@ final class AppState {
 
     private static func isSettingsWindow(_ window: NSWindow) -> Bool {
         let id = window.identifier?.rawValue ?? ""
+        if id.contains(settingsWindowID) {
+            return true
+        }
         let title = window.title
-        return id.contains(settingsWindowID)
-            || title.localizedCaseInsensitiveContains("Settings")
-            || title.localizedCaseInsensitiveContains("设置")
-            || title.localizedCaseInsensitiveContains("StrokeMouse")
+        if title.localizedCaseInsensitiveContains("StrokeMouse") {
+            return true
+        }
+        let localizedTitle = L10n.string("settings.windowTitle")
+        return !localizedTitle.isEmpty
+            && title.localizedCaseInsensitiveContains(localizedTitle)
     }
 
     private static func isSettingsWindowVisible() -> Bool {

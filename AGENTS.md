@@ -18,7 +18,7 @@ Bundle ID：Release `com.strokemouse.app`；Debug `com.strokemouse.app.dev`（�
 | 最低系统 | macOS 14 |
 | 事件 | `CGEventTap` + 动态加载 `MultitouchSupport`（触控手势为实验性能力） |
 | 配置 | Codable JSON → `Application Support/StrokeMouse/` |
-| i18n | `Localizable.xcstrings`（en + zh-Hans） |
+| i18n | `Localizable.xcstrings`（en + zh-Hans + zh-Hant + ko + ja + ru + fr） |
 | 工程 | XcodeGen（`project.yml`） |
 | 依赖 | LaunchAtLogin-Modern（登录启动）+ Sparkle（应用内更新） |
 | 签名 | 开发 `StrokeMouse Dev`；Release **`StrokeMouse Release`** 自签（固定身份，辅助功能跨更新保留）；仅 smoke 可用 ad-hoc |
@@ -122,7 +122,7 @@ SPARKLE_PUBLIC_KEY="..." ARCH=x86_64 ./scripts/package-app.sh
 
 ## 编码约定
 
-1. **用户可见文案**必须走 `String(localized:)` / String Catalog，同时提供 **en** 与 **zh-Hans**。
+1. **用户可见文案**必须走 `String(localized:)` / String Catalog，同时提供 **en**、**zh-Hans**、**zh-Hant**、**ko**、**ja**、**ru**、**fr**。
 2. **中文 UI 提示断句**：hint / help / caption / empty subtitle / footer / warning 等短提示中，同一条提示内的并列或承接分句使用 **逗号（，）或分号（；）**，不要用 **句号（。）** 把短提示拆成多句。句号仅用于提示真正结束，或长文案中语义独立的段落 / 列表项。英文保持正常句号习惯。  
    - 反例：`为此应用添加手势。在此新建的手势会默认绑定该应用。`  
    - 正例：`为此应用添加手势，在此新建的手势会默认绑定该应用。`
