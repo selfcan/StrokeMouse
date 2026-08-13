@@ -1,88 +1,31 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useData } from 'vitepress'
 import {
   APP_VERSION,
   GITHUB_RELEASES,
   MAC_ASSETS,
   releaseAssetUrl,
 } from '../constants'
+import { downloadCopy, localeHref, useSiteLocale } from '../i18n'
 import TerminalBlock from './TerminalBlock.vue'
 
-const { lang } = useData()
-const isZh = computed(() => !lang.value || lang.value.startsWith('zh'))
+const locale = useSiteLocale()
 
-const copy = computed(() =>
-  isZh.value
-    ? {
-        title: '下载 StrokeMouse',
-        lead: 'macOS 生产构建。请按芯片架构选择对应安装包。',
-        version: `v${APP_VERSION}`,
-        homebrewTitle: 'Homebrew（推荐）',
-        homebrewDesc: '安装、升级与卸载依次使用以下命令；安装命令会自动添加 StrokeMouse 项目维护的 Tap。',
-        homebrewLines: [
-          'brew install --cask licoy/tap/strokemouse',
-          'brew upgrade --cask --greedy strokemouse',
-          'brew uninstall --cask strokemouse',
-        ],
-        homebrewNote: 'StrokeMouse 同时支持应用内更新，因此 Homebrew 升级命令使用 --greedy。',
-        manual: '手动下载 DMG',
-        armTitle: 'Apple Silicon',
-        armDesc: 'M1 / M2 / M3 / M4 及更新芯片',
-        intelTitle: 'Intel',
-        intelDesc: 'Intel 处理器 Mac',
-        get: '下载',
-        reqLabel: '系统要求',
-        reqValue: 'macOS 14 Sonoma 或更高',
-        installTitle: 'DMG 安装说明',
-        steps: [
-          '下载对应架构的 .dmg 安装包',
-          '打开 .dmg，将 StrokeMouse 拖入「应用程序」',
-          '首次启动请右键点按 App 并选择「打开」，或在「隐私与安全性」中选择「仍要打开」',
-          '首次启动后，在「系统设置 → 隐私与安全性 → 辅助功能」中授权',
-          '打开设置 → 手势，开始配置',
-        ],
-        releases: '全部发行版',
-        source: '从源码构建',
-        sourceLink: '/guide/installation',
-        note: '当前版本使用固定自签代码签名且未经 Apple 公证；首次启动如被拦截，请按下方步骤在系统设置中放行。',
-        fileLabel: '文件',
-      }
-    : {
-        title: 'Download StrokeMouse',
-        lead: 'Production builds for macOS. Pick the package that matches your chip.',
-        version: `v${APP_VERSION}`,
-        homebrewTitle: 'Homebrew (recommended)',
-        homebrewDesc: 'Use these commands to install, upgrade, or uninstall. Installation automatically adds the project-maintained Licoy tap.',
-        homebrewLines: [
-          'brew install --cask licoy/tap/strokemouse',
-          'brew upgrade --cask --greedy strokemouse',
-          'brew uninstall --cask strokemouse',
-        ],
-        homebrewNote: 'StrokeMouse also supports in-app updates, so Homebrew upgrades use --greedy.',
-        manual: 'Manual DMG download',
-        armTitle: 'Apple Silicon',
-        armDesc: 'M1 / M2 / M3 / M4 and later',
-        intelTitle: 'Intel',
-        intelDesc: 'Intel-based Mac',
-        get: 'Download',
-        reqLabel: 'Requirements',
-        reqValue: 'macOS 14 Sonoma or later',
-        installTitle: 'DMG installation',
-        steps: [
-          'Download the .dmg for your architecture',
-          'Open the .dmg and drag StrokeMouse into Applications',
-          'For first launch, right-click the app and choose Open, or use Privacy & Security → Open Anyway',
-          'On first launch, grant Accessibility in System Settings → Privacy & Security',
-          'Open Settings → Gestures and start configuring',
-        ],
-        releases: 'All releases',
-        source: 'Build from source',
-        sourceLink: '/en/guide/installation',
-        note: 'Current releases use a stable self-signed identity and are not Apple-notarized. If first launch is blocked, follow the steps below to approve the app in System Settings.',
-        fileLabel: 'File',
-      },
-)
+const HOMEBREW_LINES = [
+  'brew install --cask licoy/tap/strokemouse',
+  'brew upgrade --cask --greedy strokemouse',
+  'brew uninstall --cask strokemouse',
+]
+
+const copy = computed(() => {
+  const text = downloadCopy(locale.value)
+  return {
+    ...text,
+    version: `v${APP_VERSION}`,
+    homebrewLines: HOMEBREW_LINES,
+    sourceLink: localeHref(locale.value, '/guide/installation'),
+  }
+})
 
 const cards = computed(() => [
   {

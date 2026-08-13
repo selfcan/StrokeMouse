@@ -68,7 +68,7 @@ brew uninstall --cask strokemouse
 brew uninstall --cask --zap strokemouse
 ```
 
-Vous pouvez aussi télécharger le DMG de votre architecture sur la [page de téléchargement officielle](https://strokemouse.com/download). Les versions actuelles utilisent une signature auto-signée stable et ne sont pas notariées par Apple. Si Gatekeeper bloque le premier lancement, cliquez l’app en maintenant Contrôle puis choisissez Ouvrir, ou utilisez Réglages Système → Confidentialité et sécurité → Ouvrir quand même.
+Vous pouvez aussi télécharger le DMG de votre architecture sur la [page de téléchargement officielle](https://strokemouse.com/fr/download). Les versions actuelles utilisent une signature auto-signée stable et ne sont pas notariées par Apple. Si Gatekeeper bloque le premier lancement, cliquez l’app en maintenant Contrôle puis choisissez Ouvrir, ou utilisez Réglages Système → Confidentialité et sécurité → Ouvrir quand même.
 
 ## Autorisations
 

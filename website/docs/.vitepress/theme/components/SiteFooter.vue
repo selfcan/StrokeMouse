@@ -1,37 +1,24 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useData } from 'vitepress'
 import { GITHUB_REPO } from '../constants'
+import { footerCopy, localeHref, useSiteLocale } from '../i18n'
 
-const { lang } = useData()
+const locale = useSiteLocale()
 
-const isZh = computed(() => !lang.value || lang.value.startsWith('zh'))
-
-const copy = computed(() =>
-  isZh.value
-    ? {
-        brand: 'StrokeMouse',
-        docs: '文档',
-        docsLink: '/guide/getting-started',
-        download: '下载',
-        downloadLink: '/download',
-        install: '源码构建',
-        installLink: '/guide/installation',
-        github: '源码',
-        license: 'AGPL-3.0',
-      }
-    : {
-        brand: 'StrokeMouse',
-        docs: 'Docs',
-        docsLink: '/en/guide/getting-started',
-        download: 'Download',
-        downloadLink: '/en/download',
-        install: 'Build from source',
-        installLink: '/en/guide/installation',
-        github: 'Source',
-        license: 'AGPL-3.0',
-      },
-)
+const copy = computed(() => {
+  const text = footerCopy(locale.value)
+  return {
+    brand: 'StrokeMouse',
+    docs: text.docs,
+    docsLink: localeHref(locale.value, '/guide/getting-started'),
+    download: text.download,
+    downloadLink: localeHref(locale.value, '/download'),
+    install: text.install,
+    installLink: localeHref(locale.value, '/guide/installation'),
+    github: text.github,
+    license: 'AGPL-3.0',
+  }
+})
 
 const licenseUrl = `${GITHUB_REPO}/blob/main/LICENSE`
 </script>

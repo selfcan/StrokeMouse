@@ -1,14 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import { useData } from 'vitepress'
 import { PhCheckCircle } from '@phosphor-icons/vue'
 import GestureStrokeCanvas from './GestureStrokeCanvas.vue'
 import { GESTURE_PATHS } from '../gesturePaths'
-import {
-  DEFAULT_GESTURE_DEMOS,
-  toastMatchedText,
-  type GestureDemo,
-} from '../defaultGestureDemos'
+import { DEFAULT_GESTURE_DEMOS, type GestureDemo } from '../defaultGestureDemos'
+import { gestureName, gestureUi, toastMatchedText, useSiteLocale } from '../i18n'
 
 const props = withDefaults(
   defineProps<{
@@ -18,8 +14,7 @@ const props = withDefaults(
   { compact: false },
 )
 
-const { lang } = useData()
-const isZh = computed(() => !lang.value || lang.value.startsWith('zh'))
+const locale = useSiteLocale()
 
 const demos = DEFAULT_GESTURE_DEMOS
 const index = ref(0)
@@ -35,12 +30,10 @@ const current = computed<GestureDemo>(() => demos[index.value % demos.length])
 const points = computed(() => GESTURE_PATHS[current.value.path] ?? [])
 
 const labelText = computed(
-  () => props.label || (isZh.value ? '轨迹捕获' : 'Stroke capture'),
+  () => props.label || gestureUi(locale.value).capture,
 )
 
-const footerLeft = computed(() =>
-  isZh.value ? current.value.nameZh : current.value.nameEn,
-)
+const footerLeft = computed(() => gestureName(current.value.path, locale.value))
 
 let toastHideTimer = 0
 let nextTimer = 0
@@ -57,8 +50,8 @@ function measure() {
 }
 
 function showToast(demo: GestureDemo) {
-  const name = isZh.value ? demo.nameZh : demo.nameEn
-  toastText.value = toastMatchedText(name, demo.score, isZh.value)
+  const name = gestureName(demo.path, locale.value)
+  toastText.value = toastMatchedText(name, demo.score, locale.value)
   toastVisible.value = true
   window.clearTimeout(toastHideTimer)
   toastHideTimer = window.setTimeout(() => {
@@ -126,7 +119,7 @@ watch(index, async () => {
 
     <div class="hero-hud__footer">
       <span class="hero-hud__name">{{ footerLeft }}</span>
-      <span class="ok">{{ isZh ? '已匹配' : 'Matched' }}</span>
+      <span class="ok">{{ gestureUi(locale).matched }}</span>
     </div>
   </div>
 </template>

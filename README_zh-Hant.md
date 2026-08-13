@@ -68,7 +68,7 @@ brew uninstall --cask strokemouse
 brew uninstall --cask --zap strokemouse
 ```
 
-也可前往 [官網下載頁](https://strokemouse.com/download) 手動下載對應架構的 DMG。目前發行版使用固定自簽程式碼簽署且未經 Apple 公證；首次啟動若被 Gatekeeper 阻擋，請按住 Control 點按 App 並選擇「打開」，或在「系統設定 → 隱私權與安全性」中選擇「仍要打開」。
+也可前往 [官網下載頁](https://strokemouse.com/zh-hant/download) 手動下載對應架構的 DMG。目前發行版使用固定自簽程式碼簽署且未經 Apple 公證；首次啟動若被 Gatekeeper 阻擋，請按住 Control 點按 App 並選擇「打開」，或在「系統設定 → 隱私權與安全性」中選擇「仍要打開」。
 
 ## 權限
 

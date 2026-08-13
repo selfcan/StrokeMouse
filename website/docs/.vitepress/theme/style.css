@@ -361,7 +361,7 @@ html:not(.dark) .VPNavBar.has-sidebar:not(.top) {
     max-width: calc(var(--vp-layout-max-width) - 64px) !important;
   }
 
-  .VPNavBar.has-sidebar .title {
+  .VPNavBar.has-sidebar > .wrapper > .container > .title {
     position: relative !important;
     top: auto !important;
     left: auto !important;
@@ -382,7 +382,7 @@ html:not(.dark) .VPNavBar.has-sidebar:not(.top) {
 }
 
 @media (min-width: 1440px) {
-  .VPNavBar.has-sidebar .title {
+  .VPNavBar.has-sidebar > .wrapper > .container > .title {
     padding-left: 0 !important;
     width: auto !important;
   }
@@ -393,20 +393,18 @@ html:not(.dark) .VPNavBar.has-sidebar:not(.top) {
   }
 }
 
-.VPNavBar .title {
-  font-family: var(--sm-font-sans);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  border: none !important;
-  border-bottom: none !important;
-  color: var(--sm-text) !important;
-  height: var(--vp-nav-height) !important;
-}
-
 .VPNavBarTitle,
 .VPNavBarTitle .title {
   border: none !important;
   border-bottom: none !important;
+}
+
+.VPNavBarTitle .title {
+  font-family: var(--sm-font-sans);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--sm-text) !important;
+  height: var(--vp-nav-height) !important;
 }
 
 .VPNavBarTitle .logo,
@@ -448,6 +446,69 @@ html:not(.dark) .VPMenuLink .link:hover {
   color: #1557a8 !important;
 }
 
+/*
+ * Replace VitePress i18n flyout (current locale is pulled to the top).
+ * Our LanguageSwitch keeps a fixed order and highlights in place.
+ */
+.VPNavBar .content-body > .search {
+  order: 1;
+}
+
+.VPNavBar .content-body > .menu {
+  order: 2;
+}
+
+.VPNavBar .content-body > .sm-lang {
+  order: 3;
+}
+
+.VPNavBar .content-body > .translations {
+  display: none !important;
+}
+
+.VPNavBar .content-body > .appearance {
+  order: 5;
+}
+
+.VPNavBar .content-body > .social-links {
+  order: 6;
+}
+
+.VPNavBar .content-body > .extra {
+  order: 7;
+}
+
+.VPNavBar .content-body > .hamburger {
+  order: 8;
+}
+
+.VPNavBarTranslations,
+.VPNavBarExtra .group.translations,
+.VPNavScreenTranslations {
+  display: none !important;
+}
+
+.VPNavScreen .container {
+  display: flex;
+  flex-direction: column;
+}
+
+.VPNavScreen .menu {
+  order: 1;
+}
+
+.VPNavScreen .sm-lang-screen {
+  order: 2;
+}
+
+.VPNavScreen .appearance {
+  order: 3;
+}
+
+.VPNavScreen .social-links {
+  order: 4;
+}
+
 .VPNavBarMenuLink {
   font-family: var(--sm-font-sans);
   font-size: 13.5px !important;
@@ -468,11 +529,32 @@ html:not(.dark) .VPMenuLink .link:hover {
   z-index: var(--vp-z-index-sidebar) !important;
 }
 
+.VPSidebar .group {
+  padding-top: 6px !important;
+}
+
+.VPSidebar .group + .group {
+  margin-top: 6px;
+  padding-top: 12px !important;
+}
+
+.VPSidebarItem.level-0 {
+  padding-bottom: 6px !important;
+}
+
+.VPSidebarItem .text {
+  padding: 0 !important;
+  line-height: 22px !important;
+  font-size: 14px !important;
+}
+
 .VPSidebarItem.level-0 > .item > .text {
   font-family: var(--sm-font-sans);
-  font-size: 11px;
+  font-size: 12px !important;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
+  line-height: 18px !important;
+  padding: 4px 0 !important;
   text-transform: uppercase;
   color: var(--sm-text-faint) !important;
 }
@@ -480,8 +562,8 @@ html:not(.dark) .VPMenuLink .link:hover {
 .VPSidebarItem.level-0 > .items {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 4px 0 10px;
+  gap: 2px;
+  padding: 4px 0 0;
 }
 
 .VPSidebarItem.level-1 {
@@ -494,8 +576,8 @@ html:not(.dark) .VPMenuLink .link:hover {
 }
 
 .VPSidebarItem.level-1 > .item .link {
-  border-radius: 10px;
-  padding: 8px 12px !important;
+  border-radius: 8px;
+  padding: 7px 12px !important;
   min-height: 0 !important;
   transition:
     background 0.2s var(--sm-ease),
@@ -521,10 +603,6 @@ html:not(.dark) .VPMenuLink .link:hover {
 
 .VPSidebarItem .indicator {
   display: none !important;
-}
-
-.VPSidebar .group + .group {
-  margin-top: 10px;
 }
 
 @media (min-width: 960px) {

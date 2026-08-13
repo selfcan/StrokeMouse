@@ -1,22 +1,20 @@
 import { defineConfig } from 'vitepress'
+import { makeLocaleConfig } from './config/chrome'
+import { LOCALES, LOCALE_KEYS } from './config/locales'
 import { sharedConfig } from './config/shared'
-import { zhConfig } from './config/zh'
-import { enConfig } from './config/en'
 
 export default defineConfig({
   ...sharedConfig,
-  locales: {
-    root: {
-      label: '简体中文',
-      lang: 'zh-CN',
-      ...zhConfig,
-    },
-    en: {
-      label: 'English',
-      lang: 'en-US',
-      ...enConfig,
-    },
-  },
+  locales: Object.fromEntries(
+    LOCALE_KEYS.map((key) => [
+      key,
+      {
+        label: LOCALES[key].label,
+        lang: LOCALES[key].htmlLang,
+        ...makeLocaleConfig(key),
+      },
+    ]),
+  ),
   vite: {
     server: {
       port: 9243,

@@ -2,9 +2,19 @@
 
 产品官网与操作手册，基于 [VitePress](https://vitepress.dev/)。
 
-- 默认语言：简体中文（`/`）
-- 英文：`/en/`
-- 主题：扩展 VitePress 默认主题的产品向定制（Geist + 品牌蓝，`docs/.vitepress/theme`）
+语言与 README 对齐，共 7 种；语言切换器显示该语言自己的名称。
+
+| 语言 | 路径 |
+|------|------|
+| 简体中文 | `/` |
+| English | `/en/` |
+| 繁體中文 | `/zh-hant/` |
+| 한국어 | `/ko/` |
+| 日本語 | `/ja/` |
+| Русский | `/ru/` |
+| Français | `/fr/` |
+
+主题：扩展 VitePress 默认主题的产品向定制（Geist + 品牌蓝，`docs/.vitepress/theme`）。
 
 ## 开发
 
@@ -30,14 +40,21 @@ npm run preview  # 预览生产构建
 ```text
 docs/
   .vitepress/     # 配置 + 主题 + 组件
-  guide/          # 中文文档
-  en/             # 英文首页与文档
+  guide/          # 简体中文文档（站点根路径）
+  en/             # English
+  zh-hant/        # 繁體中文
+  ko/             # 한국어
+  ja/             # 日本語
+  ru/             # Русский
+  fr/             # Français
   public/         # logo / favicon / screenshots
     screenshots/  # 产品截图唯一源（README 与官网共用）
-  index.md        # 中文首页
+  index.md        # 简体中文首页
 ```
 
-修改导航 / 侧栏：`docs/.vitepress/config/zh.ts`、`en.ts`。  
+修改语言列表：`docs/.vitepress/config/locales.ts`。  
+修改导航 / 侧栏 / 搜索文案：`docs/.vitepress/config/chrome.ts`。  
+修改主题组件文案：`docs/.vitepress/theme/i18n.ts`。  
 修改全站视觉：`docs/.vitepress/theme/style.css` 与 `components/`。
 
 **截图单源**：`docs/public/screenshots/` 为仓库内唯一产品截图目录。官网首页幻灯片使用 `/screenshots/*.png`；根目录 `README.md` 与各语言 README 引用 `website/docs/public/screenshots/`。

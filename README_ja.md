@@ -68,7 +68,7 @@ brew uninstall --cask strokemouse
 brew uninstall --cask --zap strokemouse
 ```
 
-[公式ダウンロードページ](https://strokemouse.com/download) からアーキテクチャに合った DMG を入手することもできます。現行リリースは固定の自己署名コード署名を使い、Apple の公証は受けていません。初回起動が Gatekeeper にブロックされたら、App を Control クリックして「開く」を選ぶか、「システム設定 → プライバシーとセキュリティ」で「このまま開く」を選んでください。
+[公式ダウンロードページ](https://strokemouse.com/ja/download) からアーキテクチャに合った DMG を入手することもできます。現行リリースは固定の自己署名コード署名を使い、Apple の公証は受けていません。初回起動が Gatekeeper にブロックされたら、App を Control クリックして「開く」を選ぶか、「システム設定 → プライバシーとセキュリティ」で「このまま開く」を選んでください。
 
 ## 権限
 

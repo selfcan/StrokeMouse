@@ -53,7 +53,7 @@ Hold the trigger to record; release to finish. Re-record until happy.
 ## Theme & language
 
 - Appearance: follow system or force light / dark
-- Copy: EN / 中文 via String Catalog; follows system language
+- Copy: English, Simplified Chinese, Traditional Chinese, Korean, Japanese, Russian, and French (or follow the system language)
 
 ## Onboarding
 

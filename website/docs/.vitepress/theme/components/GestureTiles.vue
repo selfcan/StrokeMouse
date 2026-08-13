@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useData } from 'vitepress'
 import GestureStrokeCanvas from './GestureStrokeCanvas.vue'
 import { GESTURE_PATHS } from '../gesturePaths'
 import { DEFAULT_GESTURE_DEMOS } from '../defaultGestureDemos'
+import { gestureName, gestureUi, useSiteLocale } from '../i18n'
 import { useReveal } from '../composables/useReveal'
 
 defineProps<{
@@ -11,14 +11,13 @@ defineProps<{
   lead?: string
 }>()
 
-const { lang } = useData()
-const isZh = computed(() => !lang.value || lang.value.startsWith('zh'))
+const locale = useSiteLocale()
 
 const tiles = computed(() =>
   DEFAULT_GESTURE_DEMOS.map((d) => ({
     path: d.path,
-    action: isZh.value ? d.nameZh : d.nameEn,
-    trigger: isZh.value ? '右键' : 'Right button',
+    action: gestureName(d.path, locale.value),
+    trigger: gestureUi(locale.value).trigger,
     points: GESTURE_PATHS[d.path] ?? [],
   })),
 )

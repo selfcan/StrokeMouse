@@ -68,7 +68,7 @@ brew uninstall --cask strokemouse
 brew uninstall --cask --zap strokemouse
 ```
 
-[공식 다운로드 페이지](https://strokemouse.com/download)에서 해당 아키텍처 DMG를 받을 수도 있습니다. 현재 릴리스는 고정 자체 서명 코드 서명을 사용하며 Apple 공증을 받지 않았습니다. 첫 실행이 Gatekeeper에 막히면 앱을 Control-클릭한 뒤 「열기」를 선택하거나 「시스템 설정 → 개인정보 보호 및 보안」에서 「계속 열기」를 선택하세요.
+[공식 다운로드 페이지](https://strokemouse.com/ko/download)에서 해당 아키텍처 DMG를 받을 수도 있습니다. 현재 릴리스는 고정 자체 서명 코드 서명을 사용하며 Apple 공증을 받지 않았습니다. 첫 실행이 Gatekeeper에 막히면 앱을 Control-클릭한 뒤 「열기」를 선택하거나 「시스템 설정 → 개인정보 보호 및 보안」에서 「계속 열기」를 선택하세요.
 
 ## 권한
 

@@ -1,17 +1,30 @@
 import type { DefaultTheme, HeadConfig, UserConfig } from 'vitepress'
+import { CHROME } from './chrome'
 import {
-  absoluteUrl,
-  alternatePath,
+  GITHUB_URL,
+  LOCALES,
+  LOCALE_KEYS,
+  isDownloadPath,
+  isHomePath,
+  type LocaleKey,
+} from './locales'
+import {
   DEFAULT_OG_IMAGE,
-  pathFromRelative,
-  resolvePageSeo,
+  FAQ_LD,
   SITE_NAME,
   SITE_TITLE,
   SITE_URL,
+  absoluteUrl,
+  canonicalUrl,
+  hreflangTags,
+  localeDownloadUrl,
+  localeHomeUrl,
+  pathFromRelative,
+  resolveLocale,
+  resolvePageSeo,
 } from './seo'
 
-export { SITE_TITLE, SITE_URL }
-export const GITHUB_URL = 'https://github.com/Licoy/StrokeMouse'
+export { GITHUB_URL, SITE_TITLE, SITE_URL }
 
 export const sharedHead: HeadConfig[] = [
   ['link', { rel: 'icon', type: 'image/png', href: '/favicon.png' }],
@@ -28,7 +41,6 @@ export const sharedHead: HeadConfig[] = [
       content: 'width=device-width,initial-scale=1',
     },
   ],
-  // Default social (per-page overrides via transformHead)
   ['meta', { property: 'og:site_name', content: SITE_NAME }],
   ['meta', { property: 'og:type', content: 'website' }],
   ['meta', { property: 'og:image', content: DEFAULT_OG_IMAGE }],
@@ -41,6 +53,14 @@ export const socialLinks: DefaultTheme.SocialLink[] = [
   { icon: 'github', link: GITHUB_URL },
 ]
 
+function searchLocales(): Record<string, { translations: (typeof CHROME)[LocaleKey]['search'] }> {
+  const locales: Record<string, { translations: (typeof CHROME)[LocaleKey]['search'] }> = {}
+  for (const key of LOCALE_KEYS) {
+    locales[key] = { translations: CHROME[key].search }
+  }
+  return locales
+}
+
 export const sharedConfig: UserConfig = {
   title: SITE_TITLE,
   cleanUrls: true,
@@ -49,22 +69,19 @@ export const sharedConfig: UserConfig = {
   appearance: 'dark',
   head: sharedHead,
 
-  // Fill title / description for every page from the SEO registry
   transformPageData(pageData) {
     const seo = resolvePageSeo(pageData.relativePath)
-    const isHome =
-      pageData.relativePath === 'index.md' || pageData.relativePath === 'en/index.md'
-    const isEn = pageData.relativePath.replace(/\\/g, '/').startsWith('en/')
+    const locale = resolveLocale(pageData.relativePath)
+    const isHome = pageData.relativePath.replace(/\\/g, '/').endsWith('index.md')
 
     pageData.description = seo.description
-    // Force full <title> so search engines never see bare H1-only titles
     if (isHome) {
       pageData.title = seo.title
       pageData.frontmatter = {
         ...pageData.frontmatter,
         title: seo.title,
         description: seo.description,
-        titleTemplate: isEn ? 'Mouse & trackpad gestures for macOS' : 'macOS 鼠标与触控板手势',
+        titleTemplate: LOCALES[locale].titleTemplate,
       }
     } else {
       const full = `${seo.title} | ${SITE_TITLE}`
@@ -78,84 +95,66 @@ export const sharedConfig: UserConfig = {
     }
   },
 
-  // Inject full SEO head tags on every built page
   transformHead({ pageData }) {
     const seo = resolvePageSeo(pageData.relativePath)
+    const locale = resolveLocale(pageData.relativePath)
     const pathname = pathFromRelative(pageData.relativePath)
-    const pathForCanon =
-      pathname === '/en' || pathname === '/en/' ? '/en/' : pathname === '/' ? '/' : pathname
-    const canonical = absoluteUrl(pathForCanon)
-    const alts = alternatePath(pathname)
-    const enCanonical =
-      alts.en === '/en' || alts.en === '/en/' ? absoluteUrl('/en/') : absoluteUrl(alts.en)
-    const zhCanonical = alts.zh === '/' ? absoluteUrl('/') : absoluteUrl(alts.zh)
-
-    const isEn = pageData.relativePath.replace(/\\/g, '/').startsWith('en/')
-    const locale = isEn ? 'en_US' : 'zh_CN'
+    const canonical = canonicalUrl(pathname)
+    const loc = LOCALES[locale]
     const fullTitle =
       seo.title === SITE_TITLE
-        ? `${SITE_TITLE} - ${isEn ? 'Mouse & trackpad gestures for macOS' : 'macOS 鼠标与触控板手势'}`
+        ? `${SITE_TITLE} - ${loc.titleTemplate}`
         : `${seo.title} | ${SITE_TITLE}`
 
     const tags: HeadConfig[] = [
       ['meta', { name: 'description', content: seo.description }],
       ['meta', { name: 'keywords', content: seo.keywords }],
       ['link', { rel: 'canonical', href: canonical }],
+    ]
 
-      // hreflang for bilingual SEO
-      ['link', { rel: 'alternate', hreflang: 'zh-CN', href: zhCanonical }],
-      ['link', { rel: 'alternate', hreflang: 'en-US', href: enCanonical }],
-      ['link', { rel: 'alternate', hreflang: 'x-default', href: zhCanonical }],
+    for (const alt of hreflangTags(pathname)) {
+      tags.push(['link', { rel: 'alternate', hreflang: alt.hreflang, href: alt.href }])
+    }
 
-      // Open Graph
+    tags.push(
       ['meta', { property: 'og:title', content: fullTitle }],
       ['meta', { property: 'og:description', content: seo.description }],
       ['meta', { property: 'og:url', content: canonical }],
       ['meta', { property: 'og:type', content: seo.ogType ?? 'website' }],
-      ['meta', { property: 'og:locale', content: locale }],
-      [
-        'meta',
-        {
-          property: 'og:locale:alternate',
-          content: isEn ? 'zh_CN' : 'en_US',
-        },
-      ],
+      ['meta', { property: 'og:locale', content: loc.ogLocale }],
+    )
+
+    for (const key of LOCALE_KEYS) {
+      if (key === locale) continue
+      tags.push(['meta', { property: 'og:locale:alternate', content: LOCALES[key].ogLocale }])
+    }
+
+    tags.push(
       ['meta', { property: 'og:site_name', content: SITE_NAME }],
       ['meta', { property: 'og:image', content: DEFAULT_OG_IMAGE }],
       ['meta', { property: 'og:image:alt', content: fullTitle }],
-
-      // Twitter
       ['meta', { name: 'twitter:card', content: 'summary' }],
       ['meta', { name: 'twitter:title', content: fullTitle }],
       ['meta', { name: 'twitter:description', content: seo.description }],
       ['meta', { name: 'twitter:image', content: DEFAULT_OG_IMAGE }],
-    ]
+    )
 
-    // JSON-LD structured data
     const webPageLd = {
       '@context': 'https://schema.org',
-      '@type': pathname === '/' || pathname === '/en' || pathname === '/en/' ? 'WebSite' : 'WebPage',
+      '@type': isHomePath(pathname) ? 'WebSite' : 'WebPage',
       name: fullTitle,
       description: seo.description,
       url: canonical,
-      inLanguage: isEn ? 'en-US' : 'zh-CN',
+      inLanguage: loc.htmlLang,
       isPartOf: {
         '@type': 'WebSite',
         name: SITE_NAME,
         url: SITE_URL,
       },
     }
-
     tags.push(['script', { type: 'application/ld+json' }, JSON.stringify(webPageLd)])
 
-    // SoftwareApplication on home + download
-    if (
-      pathname === '/' ||
-      pathname === '/en' ||
-      pathname === '/en/' ||
-      pathname === '/download' ||
-      pathname === '/en/download'
-    ) {
+    if (isHomePath(pathname) || isDownloadPath(pathname)) {
       const appLd = {
         '@context': 'https://schema.org',
         '@type': 'SoftwareApplication',
@@ -163,8 +162,8 @@ export const sharedConfig: UserConfig = {
         applicationCategory: 'UtilitiesApplication',
         operatingSystem: 'macOS 14 or later',
         description: seo.description,
-        url: absoluteUrl(pathname === '/en' || pathname === '/en/' || pathname.startsWith('/en') ? '/en/' : '/'),
-        downloadUrl: absoluteUrl(isEn ? '/en/download' : '/download'),
+        url: localeHomeUrl(locale),
+        downloadUrl: localeDownloadUrl(locale),
         image: DEFAULT_OG_IMAGE,
         offers: {
           '@type': 'Offer',
@@ -175,67 +174,32 @@ export const sharedConfig: UserConfig = {
       tags.push(['script', { type: 'application/ld+json' }, JSON.stringify(appLd)])
     }
 
-    // FAQPage for FAQ routes
-    if (pathname.endsWith('/guide/faq')) {
-      const faqLd = isEn
-        ? {
-            '@context': 'https://schema.org',
-            '@type': 'FAQPage',
-            mainEntity: [
-              {
-                '@type': 'Question',
-                name: 'Gestures do nothing?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Check Accessibility for this app, menu bar status, that the gesture is enabled, you hold the configured trigger, and the stroke is long enough.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'Right-click menu gone?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'A short right-click still opens the menu. Long strokes are gesture-only. Or bind gestures to middle/side buttons.',
-                },
-              },
-            ],
-          }
-        : {
-            '@context': 'https://schema.org',
-            '@type': 'FAQPage',
-            mainEntity: [
-              {
-                '@type': 'Question',
-                name: '手势完全没反应？',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: '请检查辅助功能是否授权当前 App、菜单栏状态、手势是否启用、是否按住正确触发键，以及滑动是否足够长。',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: '右键菜单没了？',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: '短按右键仍可弹出菜单；长距离滑动仅用于手势。也可把手势改到中键/侧键。',
-                },
-              },
-            ],
-          }
+    if (pathname.replace(/\/$/, '').endsWith('/guide/faq')) {
+      const faqLd = {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: FAQ_LD[locale].map((item) => ({
+          '@type': 'Question',
+          name: item.name,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: item.text,
+          },
+        })),
+      }
       tags.push(['script', { type: 'application/ld+json' }, JSON.stringify(faqLd)])
     }
 
     return tags
   },
 
-  // Build-time sitemap.xml covering all locales (/, /en/, guide pages, download, …)
   sitemap: {
     hostname: SITE_URL,
     transformItems(items) {
       return items.map((item) => {
         const path = `/${item.url}`.replace(/\/{2,}/g, '/').replace(/\/$/, '') || '/'
-        const isHome = path === '/' || path === '/en'
-        const isDownload = path.endsWith('/download') || path === '/download'
+        const isHome = isHomePath(path)
+        const isDownload = isDownloadPath(path)
         const isQuickStart = path.includes('/guide/getting-started')
         return {
           ...item,
@@ -260,46 +224,7 @@ export const sharedConfig: UserConfig = {
     search: {
       provider: 'local',
       options: {
-        locales: {
-          root: {
-            translations: {
-              button: {
-                buttonText: '搜索',
-                buttonAriaLabel: '搜索文档',
-              },
-              modal: {
-                displayDetails: '显示详情',
-                resetButtonTitle: '清除查询',
-                backButtonTitle: '返回',
-                noResultsText: '没有找到结果',
-                footer: {
-                  selectText: '选择',
-                  navigateText: '切换',
-                  closeText: '关闭',
-                },
-              },
-            },
-          },
-          en: {
-            translations: {
-              button: {
-                buttonText: 'Search',
-                buttonAriaLabel: 'Search docs',
-              },
-              modal: {
-                displayDetails: 'Display details',
-                resetButtonTitle: 'Reset search',
-                backButtonTitle: 'Back',
-                noResultsText: 'No results',
-                footer: {
-                  selectText: 'to select',
-                  navigateText: 'to navigate',
-                  closeText: 'to close',
-                },
-              },
-            },
-          },
-        },
+        locales: searchLocales(),
       },
     },
   },
