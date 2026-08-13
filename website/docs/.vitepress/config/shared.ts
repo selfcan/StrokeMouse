@@ -1,5 +1,6 @@
 import type { DefaultTheme, HeadConfig, UserConfig } from 'vitepress'
 import { CHROME } from './chrome'
+import { localeRedirectInlineScript } from './localeDetect'
 import {
   GITHUB_URL,
   LOCALES,
@@ -27,6 +28,7 @@ import {
 export { GITHUB_URL, SITE_TITLE, SITE_URL }
 
 export const sharedHead: HeadConfig[] = [
+  ['script', {}, localeRedirectInlineScript()],
   ['link', { rel: 'icon', type: 'image/png', href: '/favicon.png' }],
   ['link', { rel: 'apple-touch-icon', href: '/favicon.png' }],
   ['meta', { name: 'theme-color', content: '#0a0e14' }],

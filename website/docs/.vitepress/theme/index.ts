@@ -14,12 +14,14 @@ import ScreenshotCarousel from './components/ScreenshotCarousel.vue'
 import ProofStrip from './components/ProofStrip.vue'
 import HowItWorks from './components/HowItWorks.vue'
 import HomeCta from './components/HomeCta.vue'
+import { installLocaleRedirect } from './localePreference'
 import './style.css'
 
 export default {
   extends: DefaultTheme,
   Layout,
-  enhanceApp({ app }) {
+  enhanceApp({ app, router }) {
+    installLocaleRedirect(router)
     app.component('GeekHero', GeekHero)
     app.component('FeatureBento', FeatureBento)
     app.component('FeatureGrid', FeatureGrid)

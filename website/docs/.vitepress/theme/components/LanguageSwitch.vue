@@ -8,6 +8,7 @@ import {
   parseRelativePath,
   type LocaleKey,
 } from '../../config/locales'
+import { rememberLocaleFromHref } from '../localePreference'
 
 const props = withDefaults(
   defineProps<{
@@ -38,6 +39,7 @@ const ariaLabel = computed(() => theme.value.langMenuLabel || 'Change language')
 
 function go(href: string) {
   open.value = false
+  rememberLocaleFromHref(href)
   router.go(href)
 }
 </script>

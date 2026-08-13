@@ -19,6 +19,10 @@ export const LOCALE_KEYS = [
 
 export type LocaleKey = (typeof LOCALE_KEYS)[number]
 
+export function isLocaleKey(value: string): value is LocaleKey {
+  return (LOCALE_KEYS as readonly string[]).includes(value)
+}
+
 export interface LocaleDef {
   key: LocaleKey
   /** Directory under docs/; empty for root. */
