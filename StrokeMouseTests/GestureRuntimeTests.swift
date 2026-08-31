@@ -274,6 +274,65 @@ final class GestureRuntimeTests: XCTestCase {
         XCTAssertNil(runtime.state.activeSession)
     }
 
+    func testApplicationScopedMouseDrawOverridesIdenticalGlobalCandidate()
+        async throws
+    {
+        let source = RuntimeMultitouchSource()
+        let mouse = RuntimeMouseEventSource()
+        let runtime = GestureRuntime(
+            permissionManager: RuntimePermissionProvider(trusted: true),
+            actionExecutor: ActionExecutor(),
+            targetCapturer: MutableRuntimeTargetCapturer(
+                processIdentifier: 101,
+                bundleIdentifier: "com.google.Chrome"
+            ),
+            mouseEventTap: mouse,
+            multitouchSourceFactory: { source }
+        )
+        let global = GestureProfile(
+            name: "Global Up",
+            input: .drawn(DrawnGesture(
+                activation: .mouse(.default),
+                points: PathTemplates.up
+            )),
+            action: .none
+        )
+        let applicationSpecific = GestureProfile(
+            name: "Application Up",
+            input: .drawn(DrawnGesture(
+                activation: .mouse(.default),
+                points: PathTemplates.up
+            )),
+            action: .none,
+            scope: .apps(["com.google.Chrome"])
+        )
+        var matchedIDs: [UUID] = []
+        runtime.onMatch = { matchedIDs.append($0.profile.id) }
+
+        try runtime.apply(configuration(
+            revision: 1,
+            enabled: true,
+            profiles: [global, applicationSpecific]
+        ))
+
+        XCTAssertTrue(mouse.press(
+            .right,
+            at: CGPoint(x: 20, y: 300)
+        ))
+        mouse.release(
+            .right,
+            at: CGPoint(x: 20, y: 100)
+        )
+        await drainMainActor()
+
+        XCTAssertEqual(matchedIDs, [applicationSpecific.id])
+        guard case .matched(let profileID, _) = runtime.state.lastOutcome else {
+            return XCTFail("Expected the application-scoped gesture to match")
+        }
+        XCTAssertEqual(profileID, applicationSpecific.id)
+        XCTAssertEqual(mouse.replayedClicks, 0)
+    }
+
     func testPhysicalReleaseThenNewSourceIsProcessedInCoreOrder()
         async throws
     {
@@ -1961,6 +2020,7 @@ private final class MutableRuntimeTargetCapturer: GestureTargetCapturing,
 {
     private let lock = NSLock()
     private var storedProcessIdentifier: pid_t
+    private let bundleIdentifier: String
 
     var processIdentifier: pid_t {
         get {
@@ -1975,8 +2035,12 @@ private final class MutableRuntimeTargetCapturer: GestureTargetCapturing,
         }
     }
 
-    init(processIdentifier: pid_t) {
+    init(
+        processIdentifier: pid_t,
+        bundleIdentifier: String = "com.example.target"
+    ) {
         storedProcessIdentifier = processIdentifier
+        self.bundleIdentifier = bundleIdentifier
     }
 
     func capture(
@@ -1989,7 +2053,7 @@ private final class MutableRuntimeTargetCapturer: GestureTargetCapturing,
                 policy: .frontmostWindow,
                 identity: GestureTargetIdentity(
                     processIdentifier: capturedProcessIdentifier,
-                    bundleIdentifier: "com.example.target"
+                    bundleIdentifier: bundleIdentifier
                 ),
                 application: nil,
                 window: nil

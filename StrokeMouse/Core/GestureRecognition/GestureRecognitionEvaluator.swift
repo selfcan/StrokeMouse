@@ -129,19 +129,55 @@ enum GestureRecognitionEvaluator {
         }
     }
 
+    /// Profiles are expected to be filtered for the frozen target and input
+    /// source before evaluation.
     static func evaluateDrawn(
         path: [CGPoint],
         profiles: [GestureProfile],
         policy: GestureRecognitionPolicy
     ) -> GestureRecognitionEvaluation {
-        evaluate(
-            path: path,
-            profiles: profiles,
-            reportingButton: .right,
-            policy: policy
-        ) { profile in
+        let includesDrawn: (GestureProfile) -> Bool = { profile in
             if case .drawn = profile.input { return true }
             return false
+        }
+        let applicationSpecific = profiles.filter {
+            if case .apps = $0.scope { return true }
+            return false
+        }
+        guard !applicationSpecific.isEmpty else {
+            return evaluate(
+                path: path,
+                profiles: profiles,
+                reportingButton: .right,
+                policy: policy,
+                includes: includesDrawn
+            )
+        }
+
+        let preferred = evaluate(
+            path: path,
+            profiles: applicationSpecific,
+            reportingButton: .right,
+            policy: policy,
+            includes: includesDrawn
+        )
+        switch preferred.decision {
+        case .noCandidates, .belowThreshold:
+            let global = profiles.filter {
+                if case .global = $0.scope { return true }
+                return false
+            }
+            guard !global.isEmpty else { return preferred }
+            let fallback = evaluate(
+                path: path,
+                profiles: global,
+                reportingButton: .right,
+                policy: policy,
+                includes: includesDrawn
+            )
+            return fallback.decision == .noCandidates ? preferred : fallback
+        case .accepted, .invalidPath, .tooShort, .ambiguous:
+            return preferred
         }
     }
 

@@ -346,6 +346,98 @@ final class GestureRecognitionEvaluationTests: XCTestCase {
         XCTAssertEqual(result.candidates.count, 2)
     }
 
+    func testDrawnApplicationSpecificDirectionsOverrideMatchingGlobals() {
+        let globalUp = GestureProfile(
+            name: "Global Up",
+            pattern: .freePath(PathTemplates.up)
+        )
+        let globalDown = GestureProfile(
+            name: "Global Down",
+            pattern: .freePath(PathTemplates.down)
+        )
+        let chromeUp = GestureProfile(
+            name: "Chrome Up",
+            pattern: .freePath(PathTemplates.up),
+            scope: .apps(["com.google.Chrome"])
+        )
+        let chromeDown = GestureProfile(
+            name: "Chrome Down",
+            pattern: .freePath(PathTemplates.down),
+            scope: .apps(["com.google.Chrome"])
+        )
+        let profiles = [globalUp, globalDown, chromeUp, chromeDown]
+
+        for (path, expected) in [
+            (PathTemplates.up, chromeUp),
+            (PathTemplates.down, chromeDown),
+        ] {
+            let result = GestureRecognitionEvaluator.evaluateDrawn(
+                path: path.map(\.cgPoint),
+                profiles: profiles,
+                policy: .standard(minimumPathLength: 0)
+            )
+
+            XCTAssertEqual(result.decision, .accepted)
+            XCTAssertEqual(result.acceptedCandidate?.profile.id, expected.id)
+        }
+    }
+
+    func testDrawnFallsBackToGlobalWhenApplicationSpecificDoesNotMatch() {
+        let global = GestureProfile(
+            name: "Global Right",
+            pattern: .freePath(PathTemplates.right)
+        )
+        let chrome = GestureProfile(
+            name: "Chrome Up",
+            pattern: .freePath(PathTemplates.up),
+            scope: .apps(["com.google.Chrome"])
+        )
+        let appOnly = GestureRecognitionEvaluator.evaluateDrawn(
+            path: PathTemplates.right.map(\.cgPoint),
+            profiles: [chrome],
+            policy: .standard(minimumPathLength: 0)
+        )
+
+        let result = GestureRecognitionEvaluator.evaluateDrawn(
+            path: PathTemplates.right.map(\.cgPoint),
+            profiles: [global, chrome],
+            policy: .standard(minimumPathLength: 0)
+        )
+
+        XCTAssertEqual(appOnly.decision, .belowThreshold)
+        XCTAssertEqual(result.decision, .accepted)
+        XCTAssertEqual(result.acceptedCandidate?.profile.id, global.id)
+        XCTAssertEqual(result.candidates.map(\.profile.id), [global.id])
+    }
+
+    func testDrawnApplicationSpecificAmbiguityDoesNotFallBackToGlobal() {
+        let template = GestureRecognitionTestSupport.recordedNarrowPeak
+        let global = GestureProfile(
+            name: "Global",
+            pattern: .freePath(template.map(CodablePoint.init))
+        )
+        let applicationSpecific = ["First", "Second"].map { name in
+            GestureProfile(
+                name: name,
+                pattern: .freePath(template.map(CodablePoint.init)),
+                scope: .apps(["com.google.Chrome"])
+            )
+        }
+
+        let result = GestureRecognitionEvaluator.evaluateDrawn(
+            path: template,
+            profiles: [global] + applicationSpecific,
+            policy: .standard(minimumPathLength: 0)
+        )
+
+        XCTAssertEqual(result.decision, .ambiguous)
+        XCTAssertNil(result.acceptedCandidate)
+        XCTAssertEqual(
+            Set(result.candidates.map(\.profile.id)),
+            Set(applicationSpecific.map(\.id))
+        )
+    }
+
     func testInvalidAndTooShortPathsHaveExplicitDecisions() {
         let invalid = GestureRecognitionEvaluator.evaluate(
             path: [CGPoint(x: CGFloat.nan, y: 0), CGPoint(x: 1, y: 1)],
