@@ -28,10 +28,24 @@ import {
 export { GITHUB_URL, SITE_TITLE, SITE_URL }
 
 export const sharedHead: HeadConfig[] = [
+  [
+    'script',
+    {},
+    `(()=>{try{var s=localStorage.getItem("vitepress-theme-appearance");if(s==="light"){document.documentElement.classList.remove("dark");document.documentElement.setAttribute("data-mode","paper");}else{document.documentElement.classList.add("dark");document.documentElement.setAttribute("data-mode","ink");}}catch(e){}})();`,
+  ],
   ['script', {}, localeRedirectInlineScript()],
   ['link', { rel: 'icon', type: 'image/png', href: '/favicon.png' }],
   ['link', { rel: 'apple-touch-icon', href: '/favicon.png' }],
-  ['meta', { name: 'theme-color', content: '#0a0e14' }],
+  ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
+  ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }],
+  [
+    'link',
+    {
+      rel: 'stylesheet',
+      href: 'https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,600;0,700;0,800;0,900;1,800;1,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap',
+    },
+  ],
+  ['meta', { name: 'theme-color', content: '#17171a' }],
   ['meta', { name: 'author', content: 'StrokeMouse' }],
   ['meta', { name: 'robots', content: 'index, follow, max-image-preview:large' }],
   ['meta', { name: 'googlebot', content: 'index, follow' }],

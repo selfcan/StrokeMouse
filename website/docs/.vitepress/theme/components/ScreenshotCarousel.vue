@@ -3,8 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Autoplay, Navigation, Pagination } from 'swiper/modules'
 import type { Swiper as SwiperType } from 'swiper'
-import { PhCaretLeft, PhCaretRight } from '@phosphor-icons/vue'
-import { useReveal } from '../composables/useReveal'
+import { generalUiCopy, useSiteLocale } from '../i18n'
 
 import 'swiper/css'
 import 'swiper/css/navigation'
@@ -23,7 +22,7 @@ const props = withDefaults(
   }>(),
   {
     shots: () => [
-      { src: '/screenshots/1.png', alt: 'Gesture list' },
+      { src: '/screenshots/1.png', alt: 'Gesture library' },
       { src: '/screenshots/2.png', alt: 'Gesture test' },
       { src: '/screenshots/3.png', alt: 'General settings' },
       { src: '/screenshots/4.png', alt: 'Permissions' },
@@ -33,12 +32,13 @@ const props = withDefaults(
   },
 )
 
+const locale = useSiteLocale()
+const generalCopy = computed(() => generalUiCopy(locale.value))
+
 const modules = [Autoplay, Navigation, Pagination]
 const active = ref(0)
 const swiperRef = ref<SwiperType | null>(null)
-const root = ref<HTMLElement | null>(null)
 const reducedMotion = ref(false)
-useReveal(root)
 
 onMounted(() => {
   reducedMotion.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -48,7 +48,7 @@ const autoplay = computed(() =>
   reducedMotion.value
     ? false
     : {
-        delay: 4000,
+        delay: 4500,
         disableOnInteraction: false,
         pauseOnMouseEnter: true,
       },
@@ -68,271 +68,299 @@ function onSlideChange(swiper: SwiperType) {
 </script>
 
 <template>
-  <section ref="root" class="sm-showcase sm-section">
-    <header v-if="heading || description" class="sm-showcase__head sm-reveal">
-      <h2 v-if="heading" class="sm-section__title">{{ heading }}</h2>
-      <p v-if="description" class="sm-section__lead">{{ description }}</p>
-    </header>
+  <section class="hd-shots">
+    <div v-if="heading || description" class="hd-shots-header">
+      <h2 v-if="heading" class="hd-shots-title">{{ heading }}</h2>
+      <p v-if="description" class="hd-shots-lead">{{ description }}</p>
+    </div>
 
-    <div class="sm-showcase__carousel sm-reveal">
-      <div class="sm-bezel">
-        <div class="sm-bezel__core sm-showcase__stage">
-          <Swiper
-            :modules="modules"
-            :slides-per-view="1"
-            :loop="true"
-            :grab-cursor="true"
-            :simulate-touch="true"
-            :allow-touch-move="true"
-            :speed="450"
-            :autoplay="autoplay"
-            :navigation="{
-              nextEl: '.sm-showcase-next',
-              prevEl: '.sm-showcase-prev',
-            }"
-            :pagination="{ clickable: true, el: '.sm-showcase__pagination' }"
-            class="sm-showcase__swiper"
-            @swiper="onSwiper"
-            @slide-change="onSlideChange"
-          >
-            <SwiperSlide v-for="(shot, i) in props.shots" :key="shot.src">
-              <img
-                :src="shot.src"
-                :alt="shot.alt"
-                :loading="i === 0 ? 'eager' : 'lazy'"
-                draggable="false"
-              />
-            </SwiperSlide>
-          </Swiper>
+    <div class="hd-shots-frame">
+      <!-- Top Chrome Bar -->
+      <div class="hd-shots-bar">
+        <div class="hd-shots-bar-left">
+          <span class="hd-shots-dot" />
+          <span class="hd-shots-dot" />
+          <span class="hd-shots-dot" />
+          <span class="hd-shots-title-text">
+            {{ shots[active]?.alt || 'StrokeMouse UI' }}
+          </span>
+        </div>
 
-          <button type="button" class="sm-showcase__nav sm-showcase-prev" aria-label="Previous">
-            <PhCaretLeft :size="20" weight="bold" />
+        <div class="hd-shots-controls">
+          <button type="button" class="hd-shot-nav hd-shot-prev" aria-label="Previous">
+            ←
           </button>
-          <button type="button" class="sm-showcase__nav sm-showcase-next" aria-label="Next">
-            <PhCaretRight :size="20" weight="bold" />
+          <span class="hd-shot-counter">0{{ active + 1 }} / 0{{ shots.length }}</span>
+          <button type="button" class="hd-shot-nav hd-shot-next" aria-label="Next">
+            →
           </button>
         </div>
       </div>
-    </div>
 
-    <div class="sm-showcase__pagination" />
+      <!-- Swiper Stage -->
+      <div class="hd-shots-stage">
+        <Swiper
+          :modules="modules"
+          :slides-per-view="1"
+          :loop="true"
+          :speed="400"
+          :autoplay="autoplay"
+          :navigation="{
+            nextEl: '.hd-shot-next',
+            prevEl: '.hd-shot-prev',
+          }"
+          class="hd-shots-swiper"
+          @swiper="onSwiper"
+          @slide-change="onSlideChange"
+        >
+          <SwiperSlide v-for="shot in props.shots" :key="shot.src">
+            <div class="hd-shot-slide">
+              <img
+                :src="shot.src"
+                :alt="shot.alt"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+          </SwiperSlide>
+        </Swiper>
+      </div>
 
-    <div class="sm-showcase__thumbs" role="tablist">
-      <button
-        v-for="(shot, i) in props.shots"
-        :key="shot.src"
-        type="button"
-        class="sm-showcase__thumb"
-        :class="{ active: active === i }"
-        :aria-selected="active === i"
-        :aria-label="shot.alt"
-        @click="goTo(i)"
-      >
-        <img :src="shot.src" :alt="shot.alt" loading="lazy" draggable="false" />
-      </button>
+      <!-- Thumbnails / Index Row -->
+      <div class="hd-shots-thumbs">
+        <button
+          v-for="(shot, i) in props.shots"
+          :key="shot.src"
+          type="button"
+          class="hd-thumb-btn"
+          :class="{ active: active === i }"
+          @click="goTo(i)"
+        >
+          <span class="hd-thumb-n">0{{ i + 1 }}</span>
+          <span class="hd-thumb-name">{{ shot.alt }}</span>
+        </button>
+      </div>
     </div>
   </section>
 </template>
 
 <style scoped>
-.sm-showcase__head {
-  margin-bottom: 0.25rem;
+.hd-shots {
+  padding: 48px var(--gut);
+  border-bottom: 1px solid var(--line2);
+  background: var(--bg);
 }
 
-.sm-showcase__carousel {
-  position: relative;
-  max-width: 960px;
-  margin: 0 auto;
+.hd-shots-header {
+  margin-bottom: 28px;
 }
 
-.sm-showcase__stage {
-  position: relative;
-  height: 400px;
-  background: var(--sm-bg-soft);
-}
-
-@media (max-width: 640px) {
-  .sm-showcase__stage {
-    height: 250px;
-  }
-}
-
-@media (min-width: 641px) and (max-width: 959px) {
-  .sm-showcase__stage {
-    height: 340px;
-  }
-}
-
-.sm-showcase__swiper {
-  width: 100%;
-  height: 100%;
-  cursor: grab;
-  user-select: none;
-  touch-action: pan-y;
-}
-
-.sm-showcase__swiper:active {
-  cursor: grabbing;
-}
-
-.sm-showcase__swiper :deep(.swiper-wrapper),
-.sm-showcase__swiper :deep(.swiper-slide) {
-  height: 100%;
-}
-
-.sm-showcase__swiper :deep(.swiper-slide) {
-  background: var(--sm-bg-soft);
-  display: flex;
+.hd-eyebrow {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 14px 18px;
+  color: var(--spot);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.hd-shots-title {
+  font-family: var(--disp);
+  font-weight: 900;
+  font-size: clamp(26px, 3.5vw, 44px);
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  line-height: 1.05;
+  margin: 0;
+}
+
+.hd-shots-lead {
+  color: var(--dim);
+  font-size: 15px;
+  line-height: 1.7;
+  max-width: 60ch;
+  margin: 12px 0 0;
+}
+
+.hd-shots-frame {
+  border: 1px solid var(--line2);
+  background: var(--panel);
   box-sizing: border-box;
 }
 
-.sm-showcase__swiper :deep(img) {
-  display: block;
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  pointer-events: none;
-  border-radius: 8px;
-}
-
-.sm-showcase__nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 5;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: 1px solid var(--sm-border);
-  background: color-mix(in srgb, var(--sm-bg-elevated) 92%, transparent);
-  color: var(--sm-text-muted);
+.hd-shots-bar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    opacity 0.25s var(--sm-ease),
-    color 0.2s var(--sm-ease),
-    border-color 0.2s var(--sm-ease),
-    background 0.2s var(--sm-ease);
-  box-shadow: var(--sm-shadow-sm);
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line2);
+  background: color-mix(in srgb, var(--panel) 94%, black);
+  font-size: 11.5px;
 }
 
-.sm-showcase__stage:hover .sm-showcase__nav {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.sm-showcase__nav:hover {
-  color: var(--sm-accent);
-  border-color: var(--sm-border-strong);
-}
-
-.sm-showcase-prev {
-  left: 12px;
-}
-
-.sm-showcase-next {
-  right: 12px;
-}
-
-@media (hover: none), (pointer: coarse) {
-  .sm-showcase__nav {
-    opacity: 0.92;
-    pointer-events: auto;
-  }
-}
-
-.sm-showcase__pagination {
+.hd-shots-bar-left {
   display: flex;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 16px;
-  min-height: 10px;
-}
-
-.sm-showcase__pagination :deep(.swiper-pagination-bullet) {
-  width: 8px;
-  height: 8px;
-  border-radius: 4px;
-  background: var(--sm-text-faint);
-  opacity: 0.4;
-  margin: 0 !important;
-  transition: all 0.25s var(--sm-ease);
-}
-
-.sm-showcase__pagination :deep(.swiper-pagination-bullet-active) {
-  width: 22px;
-  background: var(--sm-accent);
-  opacity: 1;
-}
-
-.sm-showcase__thumbs {
-  display: flex;
-  justify-content: center;
+  align-items: center;
   gap: 8px;
-  margin-top: 16px;
-  flex-wrap: wrap;
-  max-width: 960px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
-.sm-showcase__thumb {
-  width: 72px;
-  height: 48px;
-  padding: 0;
-  border-radius: 10px;
-  border: 1px solid var(--sm-border);
-  overflow: hidden;
+.hd-shots-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--line2);
+}
+
+.hd-shots-title-text {
+  margin-left: 8px;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.hd-shots-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hd-shot-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 24px;
+  border: 1px solid var(--line2);
+  background: var(--bg);
+  color: var(--dim);
+  font-size: 12px;
   cursor: pointer;
-  background: var(--sm-bg-elevated);
-  opacity: 0.55;
-  transition:
-    opacity 0.2s var(--sm-ease),
-    border-color 0.2s var(--sm-ease),
-    box-shadow 0.2s var(--sm-ease);
+  transition: all 0.12s ease;
 }
 
-.sm-showcase__thumb img {
+.hd-shot-nav:hover {
+  color: var(--spot);
+  border-color: var(--spot);
+}
+
+.hd-shot-counter {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+}
+
+.hd-shots-stage {
+  background: var(--bg);
+  padding: 14px;
+  line-height: 0;
+}
+
+.hd-shots-swiper {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+}
+
+.hd-shot-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg);
+}
+
+.hd-shot-slide img {
+  max-width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: contain;
   display: block;
+  border: 1px solid var(--line2);
 }
 
-.sm-showcase__thumb:hover {
-  opacity: 0.85;
+.hd-shots-thumbs {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  border-top: 1px solid var(--line2);
+  background: var(--panel);
 }
 
-.sm-showcase__thumb.active {
-  opacity: 1;
-  border-color: var(--sm-border-strong);
-  box-shadow: 0 0 0 1px var(--sm-accent-glow);
+.hd-thumb-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.12s ease;
 }
 
-@media (max-width: 640px) {
-  .sm-showcase__thumb {
-    width: 56px;
-    height: 38px;
+.hd-thumb-btn:last-child {
+  border-right: 0;
+}
+
+.hd-thumb-btn:hover {
+  background: color-mix(in srgb, var(--spot) 6%, transparent);
+}
+
+.hd-thumb-btn.active {
+  background: color-mix(in srgb, var(--spot) 12%, transparent);
+  box-shadow: inset 0 -2px 0 var(--spot);
+}
+
+.hd-thumb-n {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+}
+
+.hd-thumb-btn.active .hd-thumb-n {
+  color: var(--spot);
+}
+
+.hd-thumb-name {
+  font-family: var(--body);
+  font-size: 11.5px;
+  color: var(--dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.hd-thumb-btn.active .hd-thumb-name {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+@media (max-width: 800px) {
+  .hd-shots-thumbs {
+    grid-template-columns: repeat(3, 1fr);
   }
-
-  .sm-showcase__nav {
-    width: 36px;
-    height: 36px;
+  .hd-thumb-btn:nth-child(3n) {
+    border-right: 0;
+  }
+  .hd-thumb-btn:nth-child(-n + 3) {
+    border-bottom: 1px solid var(--line);
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .sm-showcase__swiper :deep(.swiper-wrapper) {
-    transition-duration: 0ms !important;
+@media (max-width: 500px) {
+  .hd-shots-thumbs {
+    grid-template-columns: 1fr 1fr;
+  }
+  .hd-thumb-btn:nth-child(3n) {
+    border-right: 1px solid var(--line);
+  }
+  .hd-thumb-btn:nth-child(2n) {
+    border-right: 0;
+  }
+  .hd-thumb-btn {
+    border-bottom: 1px solid var(--line);
   }
 }
 </style>

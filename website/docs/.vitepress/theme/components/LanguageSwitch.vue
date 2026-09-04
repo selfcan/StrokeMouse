@@ -21,8 +21,17 @@ const { page, hash, theme } = useData()
 const router = useRouter()
 const open = ref(false)
 
+const currentLocale = computed(() => {
+  const { locale } = parseRelativePath(page.value.relativePath)
+  return locale
+})
+
+const currentLabel = computed(() => {
+  return LOCALES[currentLocale.value]?.label || '简体中文'
+})
+
 const items = computed(() => {
-  const { locale, pageId } = parseRelativePath(page.value.relativePath)
+  const { pageId } = parseRelativePath(page.value.relativePath)
   const suffix = hash.value || ''
   return LOCALE_KEYS.map((key: LocaleKey) => {
     const path = pageId === 'index' ? localePath(key, '/') : localePath(key, `/${pageId}`)
@@ -30,7 +39,7 @@ const items = computed(() => {
       key,
       label: LOCALES[key].label,
       href: `${path}${suffix}`,
-      active: key === locale,
+      active: key === currentLocale.value,
     }
   })
 })
@@ -47,54 +56,59 @@ function go(href: string) {
 <template>
   <div
     v-if="props.variant === 'nav'"
-    class="sm-lang"
+    class="hd-lang"
     @mouseenter="open = true"
     @mouseleave="open = false"
   >
     <button
       type="button"
-      class="sm-lang__btn"
+      class="hd-lang-btn"
       :aria-expanded="open"
       :aria-label="ariaLabel"
       @click="open = !open"
     >
-      <span class="vpi-languages sm-lang__icon" />
-      <span class="vpi-chevron-down sm-lang__chevron" />
+      <svg class="hd-lang-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 2a14.5 14.5 0 0 0 0 20M12 2a14.5 14.5 0 0 1 0 20M2 12h20" />
+      </svg>
+      <span class="hd-lang-label">{{ currentLabel }}</span>
+      <span class="vpi-chevron-down hd-lang-chevron" />
     </button>
-    <div class="sm-lang__flyout" :class="{ 'is-open': open }">
-      <ul class="sm-lang__list" role="list">
+    <div class="hd-lang-flyout" :class="{ 'is-open': open }">
+      <ul class="hd-lang-list" role="list">
         <li v-for="item in items" :key="item.key">
-          <span v-if="item.active" class="sm-lang__item is-active" aria-current="page">
-            {{ item.label }}
-            <span class="sm-lang__check" aria-hidden="true">✓</span>
+          <span v-if="item.active" class="hd-lang-item is-active" aria-current="page">
+            <span>{{ item.label }}</span>
+            <span class="hd-lang-check" aria-hidden="true">✓</span>
           </span>
           <a
             v-else
-            class="sm-lang__item"
+            class="hd-lang-item"
             :href="withBase(item.href)"
             @click.prevent="go(item.href)"
           >
-            {{ item.label }}
+            <span>{{ item.label }}</span>
           </a>
         </li>
       </ul>
     </div>
   </div>
 
-  <div v-else class="sm-lang-screen">
-    <ul class="sm-lang-screen__list" role="list">
+  <div v-else class="hd-lang-screen">
+    <div class="hd-lang-screen-title">Language</div>
+    <ul class="hd-lang-screen-list" role="list">
       <li v-for="item in items" :key="item.key">
-        <span v-if="item.active" class="sm-lang-screen__item is-active" aria-current="page">
-          {{ item.label }}
-          <span class="sm-lang__check" aria-hidden="true">✓</span>
+        <span v-if="item.active" class="hd-lang-screen-item is-active" aria-current="page">
+          <span>{{ item.label }}</span>
+          <span class="hd-lang-check" aria-hidden="true">✓</span>
         </span>
         <a
           v-else
-          class="sm-lang-screen__item"
+          class="hd-lang-screen-item"
           :href="withBase(item.href)"
           @click.prevent="go(item.href)"
         >
-          {{ item.label }}
+          <span>{{ item.label }}</span>
         </a>
       </li>
     </ul>
@@ -102,154 +116,165 @@ function go(href: string) {
 </template>
 
 <style scoped>
-.sm-lang {
+.hd-lang {
   position: relative;
-  display: none;
+  display: inline-flex;
   align-items: center;
 }
 
-@media (min-width: 768px) {
-  .sm-lang {
-    display: flex;
-  }
-}
-
-.sm-lang::before {
-  margin-right: 8px;
-  margin-left: 8px;
-  width: 1px;
-  height: 24px;
-  background-color: var(--vp-c-divider);
-  content: '';
-}
-
-.sm-lang__btn {
-  display: flex;
+.hd-lang-btn {
+  display: inline-flex;
   align-items: center;
-  padding: 0 12px;
-  height: var(--vp-nav-height);
-  color: var(--vp-c-text-1);
-  background: transparent;
-  border: 0;
+  gap: 7px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line2);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 12px;
   cursor: pointer;
-  transition: color 0.25s;
+  transition: all 0.12s ease;
+  box-sizing: border-box;
 }
 
-.sm-lang:hover .sm-lang__btn,
-.sm-lang__btn[aria-expanded='true'] {
-  color: var(--sm-accent);
+.hd-lang:hover .hd-lang-btn,
+.hd-lang-btn[aria-expanded='true'] {
+  color: var(--spot);
+  border-color: var(--spot);
 }
 
-.sm-lang__icon {
-  font-size: 16px;
+.hd-lang-icon {
+  width: 14px;
+  height: 14px;
+  opacity: 0.8;
+  flex-shrink: 0;
 }
 
-.sm-lang__chevron {
-  margin-left: 4px;
-  font-size: 14px;
+.hd-lang-label {
+  font-weight: 500;
+  white-space: nowrap;
 }
 
-.sm-lang__flyout {
+.hd-lang-chevron {
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+.hd-lang-flyout {
   position: absolute;
-  top: calc(var(--vp-nav-height) / 2 + 20px);
+  top: calc(100% + 4px);
   right: 0;
-  z-index: 20;
-  min-width: 168px;
-  padding: 6px;
-  border: 1px solid var(--sm-border);
-  border-radius: 12px;
-  background-color: var(--vp-c-bg-elv);
-  box-shadow: var(--sm-shadow);
+  z-index: 50;
+  min-width: 160px;
+  padding: 4px 0;
+  border: 1px solid var(--line2);
+  background: var(--panel);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   opacity: 0;
   visibility: hidden;
-  transition:
-    opacity 0.2s var(--sm-ease),
-    visibility 0.2s var(--sm-ease);
+  transition: opacity 0.15s ease, visibility 0.15s ease;
 }
 
-.sm-lang:hover .sm-lang__flyout,
-.sm-lang__flyout.is-open {
+.hd-lang:hover .hd-lang-flyout,
+.hd-lang-flyout.is-open {
   opacity: 1;
   visibility: visible;
 }
 
-.sm-lang__list,
-.sm-lang-screen__list {
+.hd-lang-list {
   display: flex;
   flex-direction: column;
-  gap: 1px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.sm-lang__item {
+.hd-lang-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  padding: 0 10px;
-  line-height: 28px;
-  font-family: var(--sm-font-sans);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--sm-text);
-  border-radius: 8px;
-  white-space: nowrap;
+  padding: 8px 14px;
+  font-family: var(--body);
+  font-size: 12.5px;
+  color: var(--dim);
   text-decoration: none;
   cursor: pointer;
-  transition:
-    background-color 0.2s var(--sm-ease),
-    color 0.2s var(--sm-ease);
+  transition: background-color 0.1s ease, color 0.1s ease;
 }
 
-.sm-lang__item:hover {
-  background-color: var(--vp-c-default-soft);
-  color: var(--sm-accent);
+.hd-lang-item:hover {
+  background: color-mix(in srgb, var(--spot) 8%, transparent);
+  color: var(--ink);
 }
 
-.sm-lang__item.is-active {
+.hd-lang-item.is-active {
+  color: var(--spot);
+  background: color-mix(in srgb, var(--spot) 6%, transparent);
   font-weight: 600;
-  background-color: var(--vp-c-default-soft);
-  color: var(--sm-accent);
   cursor: default;
 }
 
-html:not(.dark) .sm-lang__item:hover,
-html:not(.dark) .sm-lang__item.is-active {
-  background-color: rgba(29, 111, 212, 0.1);
-  color: #1557a8;
+.hd-lang-check {
+  font-size: 11px;
+  color: var(--spot);
 }
 
-.sm-lang__check {
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1;
+/* Mobile Screen */
+.hd-lang-screen {
+  padding: 16px var(--gut);
+  border-bottom: 1px solid var(--line);
 }
 
-.sm-lang-screen {
-  margin-top: 24px;
+.hd-lang-screen-title {
+  font-family: var(--body);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--faint);
+  margin-bottom: 10px;
 }
 
-.sm-lang-screen__item {
+.hd-lang-screen-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hd-lang-screen-item {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  padding: 0;
-  line-height: 32px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--vp-c-text-1);
+  justify-content: space-between;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  font-family: var(--body);
+  font-size: 12px;
+  color: var(--dim);
   text-decoration: none;
 }
 
-.sm-lang-screen__item.is-active {
+.hd-lang-screen-item.is-active {
+  border-color: var(--spot);
+  color: var(--spot);
+  background: color-mix(in srgb, var(--spot) 8%, transparent);
   font-weight: 600;
-  color: var(--sm-accent);
 }
 
-html:not(.dark) .sm-lang-screen__item.is-active {
-  color: #1557a8;
+@media (max-width: 768px) {
+  .hd-lang-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    justify-content: center;
+    gap: 0;
+  }
+  .hd-lang-label,
+  .hd-lang-chevron {
+    display: none;
+  }
 }
 </style>

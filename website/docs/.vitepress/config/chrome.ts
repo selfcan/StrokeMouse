@@ -402,10 +402,7 @@ export function makeLocaleConfig(key: LocaleKey): LocaleSpecificConfig<DefaultTh
       darkModeSwitchLabel: ui.darkMode,
       lightModeSwitchTitle: ui.lightMode,
       darkModeSwitchTitle: ui.darkModeTitle,
-      footer: {
-        message: ui.footerMessage,
-        copyright: ui.footerCopyright,
-      },
+      footer: false,
     },
   }
 }

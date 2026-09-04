@@ -23,6 +23,19 @@ description: "StrokeMouse 是 macOS 鼠标与触控板手势自定义工具。�
   :items="['本地运行', '无遥测', '开源 AGPL', 'macOS 14+']"
 />
 
+<ScreenshotCarousel
+  heading="产品界面"
+  description="手势库、测试、设置与权限，所见即所得。"
+  :shots="[
+    { src: '/screenshots/1.png', alt: '手势配置列表' },
+    { src: '/screenshots/2.png', alt: '手势测试' },
+    { src: '/screenshots/3.png', alt: '通用设置' },
+    { src: '/screenshots/4.png', alt: '权限与引擎状态' },
+    { src: '/screenshots/5.png', alt: '新建手势 · 录制轨迹' },
+    { src: '/screenshots/6.png', alt: '应用范围' },
+  ]"
+/>
+
 <HowItWorks
   heading="三步完成第一次手势"
   :steps="[
@@ -50,19 +63,6 @@ description: "StrokeMouse 是 macOS 鼠标与触控板手势自定义工具。�
 <GestureTiles
   heading="开箱默认鼠标绘制"
   lead="装好即可用的常用轨迹，也可全部自定义。"
-/>
-
-<ScreenshotCarousel
-  heading="产品界面"
-  description="手势库、测试、设置与权限，所见即所得。"
-  :shots="[
-    { src: '/screenshots/1.png', alt: '手势配置列表' },
-    { src: '/screenshots/2.png', alt: '手势测试' },
-    { src: '/screenshots/3.png', alt: '通用设置' },
-    { src: '/screenshots/4.png', alt: '权限与引擎状态' },
-    { src: '/screenshots/5.png', alt: '新建手势 · 录制轨迹' },
-    { src: '/screenshots/6.png', alt: '应用范围' },
-  ]"
 />
 
 <HomeCta

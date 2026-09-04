@@ -23,6 +23,19 @@ description: "StrokeMouse — инструмент жестов мыши и тр
   :items="['Локально', 'Без телеметрии', 'Открытый код AGPL', 'macOS 14+']"
 />
 
+<ScreenshotCarousel
+  heading="Экраны продукта"
+  description="Библиотека жестов, тест, настройки и доступ."
+  :shots="[
+    { src: '/screenshots/1.png', alt: 'Список жестов' },
+    { src: '/screenshots/2.png', alt: 'Тест жестов' },
+    { src: '/screenshots/3.png', alt: 'Основные настройки' },
+    { src: '/screenshots/4.png', alt: 'Доступ' },
+    { src: '/screenshots/5.png', alt: 'Запись траектории' },
+    { src: '/screenshots/6.png', alt: 'Область приложения' },
+  ]"
+/>
+
 <HowItWorks
   heading="Первый жест за три шага"
   :steps="[
@@ -50,20 +63,6 @@ description: "StrokeMouse — инструмент жестов мыши и тр
 <GestureTiles
   heading="Жесты мыши по умолчанию"
   lead="Полезные траектории сразу после установки, всё можно изменить."
-/>
-
-
-<ScreenshotCarousel
-  heading="Экраны продукта"
-  description="Библиотека жестов, тест, настройки и доступ."
-  :shots="[
-    { src: '/screenshots/1.png', alt: 'Список жестов' },
-    { src: '/screenshots/2.png', alt: 'Тест жестов' },
-    { src: '/screenshots/3.png', alt: 'Основные настройки' },
-    { src: '/screenshots/4.png', alt: 'Доступ' },
-    { src: '/screenshots/5.png', alt: 'Запись траектории' },
-    { src: '/screenshots/6.png', alt: 'Область приложения' },
-  ]"
 />
 
 <HomeCta

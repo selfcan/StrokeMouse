@@ -1,124 +1,293 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import SmButton from './SmButton.vue'
-import { useReveal } from '../composables/useReveal'
+import { computed, ref } from 'vue'
+import { generalUiCopy, useSiteLocale } from '../i18n'
 
 defineProps<{
   heading: string
   lead?: string
-  steps: string[]
+  steps?: string[]
   primaryText: string
   primaryLink: string
   secondaryText: string
   secondaryLink: string
 }>()
 
-const root = ref<HTMLElement | null>(null)
-useReveal(root)
+const locale = useSiteLocale()
+const generalCopy = computed(() => generalUiCopy(locale.value))
+
+const copied = ref(false)
+const installCmd = 'brew install --cask licoy/tap/strokemouse'
+
+function copyInstall() {
+  if (typeof navigator !== 'undefined' && navigator.clipboard) {
+    navigator.clipboard.writeText(installCmd)
+    copied.value = true
+    setTimeout(() => {
+      copied.value = false
+    }, 2000)
+  }
+}
 </script>
 
 <template>
-  <section ref="root" class="home-cta sm-section sm-reveal">
-    <div class="home-cta__band">
-      <h2 class="home-cta__title">{{ heading }}</h2>
-      <p v-if="lead" class="home-cta__lead">{{ lead }}</p>
+  <section id="install" class="hd-end">
+    <div class="hd-end-in">
+      <h2 class="hd-end-title">{{ heading }}</h2>
+      <p v-if="lead" class="hd-end-lead">{{ lead }}</p>
 
-      <ol v-if="steps?.length" class="home-cta__steps">
-        <li v-for="(step, i) in steps" :key="i">
-          <span class="home-cta__num">{{ i + 1 }}</span>
-          <span class="home-cta__step-text">{{ step }}</span>
-        </li>
-      </ol>
+      <!-- Steps Checkpoints (if provided) -->
+      <div v-if="steps?.length" class="hd-end-steps">
+        <div v-for="(step, i) in steps" :key="i" class="hd-end-step">
+          <span class="hd-end-step-n">0{{ i + 1 }}</span>
+          <span class="hd-end-step-text">{{ step }}</span>
+        </div>
+      </div>
 
-      <div class="home-cta__actions">
-        <SmButton :href="primaryLink">{{ primaryText }}</SmButton>
-        <SmButton :href="secondaryLink" variant="ghost" :arrow="false">
-          {{ secondaryText }}
-        </SmButton>
+      <!-- Quick Command Bar -->
+      <div class="hd-end-go">
+        <div class="hd-cmd">
+          <div class="hd-cmd-inner">
+            <span class="hd-cmd-prompt">$</span>
+            <span class="hd-cmd-code">{{ installCmd }}</span>
+          </div>
+          <button
+            type="button"
+            class="hd-cmd-copy"
+            :aria-label="copied ? generalCopy.copied : generalCopy.copy"
+            @click="copyInstall"
+          >
+            {{ copied ? generalCopy.copied : generalCopy.copy }}
+          </button>
+        </div>
+
+        <a class="hd-btn hd-btn-primary" :href="primaryLink">
+          {{ primaryText }}
+        </a>
+        <a class="hd-btn hd-btn-ghost" :href="secondaryLink">
+          {{ secondaryText }} →
+        </a>
+      </div>
+
+      <div class="hd-end-meta">
+        <span>macOS 14+ Sonoma · Sequoia · Apple Silicon &amp; Intel · AGPL-3.0</span>
+        <span class="meta-sep">—</span>
+        <a :href="primaryLink">{{ generalCopy.allDownloads }}</a>
       </div>
     </div>
   </section>
 </template>
 
 <style scoped>
-.home-cta {
-  padding-bottom: 1rem !important;
+.hd-end {
+  padding: 56px var(--gut) 48px;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
 }
 
-.home-cta__band {
-  text-align: center;
-  padding: 2.75rem 1.5rem 2.85rem;
-  border-radius: var(--sm-radius-shell);
-  background:
-    radial-gradient(ellipse 70% 80% at 50% 0%, var(--sm-accent-glow), transparent 65%),
-    var(--sm-panel);
-  box-shadow: inset 0 0 0 1px var(--sm-border);
+.hd-end-in {
+  max-width: 900px;
 }
 
-.home-cta__title {
+.hd-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  color: var(--spot);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.hd-end-title {
+  font-family: var(--disp);
+  font-weight: 900;
+  font-size: clamp(28px, 4vw, 56px);
+  letter-spacing: -0.045em;
+  line-height: 1.05;
   margin: 0;
-  font-family: var(--sm-font-sans);
-  font-size: clamp(1.45rem, 3vw, 1.85rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--sm-text);
-  text-wrap: balance;
+  color: var(--ink);
 }
 
-.home-cta__lead {
-  margin: 0.65rem auto 0;
-  max-width: 28rem;
-  font-size: 1rem;
-  line-height: 1.55;
-  color: var(--sm-text-muted);
+.hd-end-lead {
+  color: var(--dim);
+  font-size: 15.5px;
+  line-height: 1.7;
+  max-width: 58ch;
+  margin: 16px 0 0;
 }
 
-.home-cta__steps {
-  list-style: none;
-  margin: 1.5rem auto 0;
-  padding: 0;
-  width: min(28rem, 100%);
+.hd-end-steps {
   display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-  text-align: left;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
 }
 
-.home-cta__steps li {
+.hd-end-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border: 1px solid var(--line2);
+  background: var(--panel);
+  font-size: 12px;
+}
+
+.hd-end-step-n {
+  font-family: var(--mono);
+  color: var(--spot);
+  font-weight: 600;
+}
+
+.hd-end-step-text {
+  color: var(--dim);
+}
+
+.hd-end-go {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.7rem 0.95rem;
-  border-radius: 12px;
-  background: var(--sm-chrome);
-  box-shadow: inset 0 0 0 1px var(--sm-border);
+  gap: 14px;
+  margin-top: 32px;
+  flex-wrap: wrap;
 }
 
-.home-cta__num {
-  flex-shrink: 0;
-  width: 1.5rem;
-  height: 1.5rem;
+/* ── Command Box ── */
+.hd-cmd {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line2);
+  background: var(--panel);
+  height: 42px;
+  box-sizing: border-box;
+}
+
+.hd-cmd-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.hd-cmd-prompt {
+  color: var(--spot);
+  user-select: none;
+  font-weight: 600;
+}
+
+.hd-cmd-code {
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.hd-cmd-copy {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #fff;
-  background: var(--sm-accent);
+  height: 100%;
+  padding: 0 16px;
+  border: 0;
+  border-left: 1px solid var(--line2);
+  background: transparent;
+  cursor: pointer;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: all 0.12s ease;
 }
 
-.home-cta__step-text {
-  font-size: 0.92rem;
-  color: var(--sm-text-muted);
-  font-weight: 500;
+.hd-cmd-copy:hover {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--spot) 8%, transparent);
 }
 
-.home-cta__actions {
+/* ── Buttons ── */
+.hd-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
+  padding: 0 20px;
+  font-family: var(--body);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none !important;
+  box-sizing: border-box;
+  transition: all 0.12s ease;
+}
+
+.hd-btn-primary {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  border: 1px solid #0284c7 !important;
+}
+
+:root.dark .hd-btn-primary,
+html.dark .hd-btn-primary {
+  background: #38bdf8 !important;
+  color: #0b1120 !important;
+  border-color: #38bdf8 !important;
+}
+
+.hd-btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+.hd-btn-ghost {
+  border: 1px solid var(--line2);
+  background: transparent;
+  color: var(--ink) !important;
+}
+
+.hd-btn-ghost:hover {
+  border-color: var(--spot);
+  color: var(--spot) !important;
+}
+
+.hd-end-meta {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.75rem;
-  margin-top: 1.65rem;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  color: var(--faint);
+  font-size: 12px;
+}
+
+.meta-sep {
+  opacity: 0.5;
+}
+
+.hd-end-meta a {
+  color: var(--spot);
+  text-decoration: none;
+}
+
+.hd-end-meta a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .hd-cmd {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .hd-cmd-inner {
+    padding: 0 12px;
+    font-size: 12px;
+    overflow-x: auto;
+  }
+  .hd-end-go {
+    gap: 10px;
+  }
+  .hd-btn {
+    width: 100%;
+  }
 }
 </style>

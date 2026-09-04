@@ -23,6 +23,19 @@ description: "StrokeMouse 是 macOS 滑鼠與觸控式軌跡板手勢自訂工�
   :items="['本機執行', '無遙測', '開源 AGPL', 'macOS 14+']"
 />
 
+<ScreenshotCarousel
+  heading="產品介面"
+  description="手勢庫、測試、設定與權限，所見即所得。"
+  :shots="[
+    { src: '/screenshots/1.png', alt: '手勢設定列表' },
+    { src: '/screenshots/2.png', alt: '手勢測試' },
+    { src: '/screenshots/3.png', alt: '一般設定' },
+    { src: '/screenshots/4.png', alt: '權限與引擎狀態' },
+    { src: '/screenshots/5.png', alt: '新增手勢 · 錄製軌跡' },
+    { src: '/screenshots/6.png', alt: '應用範圍' },
+  ]"
+/>
+
 <HowItWorks
   heading="三步完成第一次手勢"
   :steps="[
@@ -39,9 +52,9 @@ description: "StrokeMouse 是 macOS 滑鼠與觸控式軌跡板手勢自訂工�
     { icon: 'sparkles', title: '自由軌跡比對', desc: '正規化、有限旋轉與轉折結構門檻，拒絕胡亂近鄰比對。', size: 'large', image: '/screenshots/5.png', imageAlt: '錄製軌跡' },
     { icon: 'menu', title: '選單列常駐', desc: '啟停手勢、開啟設定；圖示隨暫停或缺權限變色。' },
     { icon: 'mouse', title: '滑鼠繪製', desc: '右鍵、中鍵或側鍵觸發；只監聽已啟用設定用到的按鈕。' },
-    { icon: 'sparkles', title: '觸控板繪製', desc: '按住一個 Fn、Control、Option、Shift 或 Command，移動指標繪製軌跡；可重用滑鼠繪製規則。' },
-    { icon: 'zap', title: '實驗性觸控手勢', desc: '34 類多指輕觸、滑動、捏合、張開與旋轉；系統手勢可能同時發生。' },
-    { title: '一般設定', desc: '比對閾值、外觀與觸控手勢總開關。', size: 'media', image: '/screenshots/3.png', imageAlt: '一般設定' },
+    { icon: 'sparkles', title: '觸控板繪製', desc: '按住一個 Fn、Control、Option、Shift 或 Command，移動指標繪製軌跡；可複用滑鼠繪製規則。' },
+    { icon: 'zap', title: '實驗性觸控手勢', desc: '34 類多指輕點、滑動、雙指開合與旋轉；系統手勢可能同時發生。' },
+    { title: '一般設定', desc: '比對門檻、外觀與觸控手勢總開關。', size: 'media', image: '/screenshots/3.png', imageAlt: '一般設定' },
     { icon: 'window', title: 'App 範圍', desc: '全域或按應用程式生效；側邊欄依範圍組織手勢。' },
     { icon: 'import', title: '動作與匯入匯出', desc: '快捷鍵、視窗、媒體、Shell 與 AppleScript；JSON 批次管理。' },
   ]"
@@ -50,20 +63,6 @@ description: "StrokeMouse 是 macOS 滑鼠與觸控式軌跡板手勢自訂工�
 <GestureTiles
   heading="開箱預設滑鼠繪製"
   lead="裝好即可用的常用軌跡，也可全部自訂。"
-/>
-
-
-<ScreenshotCarousel
-  heading="產品介面"
-  description="手勢庫、測試、設定與權限，所見即所得。"
-  :shots="[
-    { src: '/screenshots/1.png', alt: '手勢設定列表' },
-    { src: '/screenshots/2.png', alt: '手勢測試' },
-    { src: '/screenshots/3.png', alt: '一般設定' },
-    { src: '/screenshots/4.png', alt: '權限與引擎狀態' },
-    { src: '/screenshots/5.png', alt: '新增手勢 · 錄製軌跡' },
-    { src: '/screenshots/6.png', alt: '應用範圍' },
-  ]"
 />
 
 <HomeCta

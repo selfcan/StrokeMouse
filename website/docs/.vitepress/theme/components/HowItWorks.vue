@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useReveal } from '../composables/useReveal'
+import { computed } from 'vue'
+import { generalUiCopy, useSiteLocale } from '../i18n'
 
 export interface HowStep {
   title: string
@@ -12,75 +12,128 @@ defineProps<{
   steps: HowStep[]
 }>()
 
-const root = ref<HTMLElement | null>(null)
-useReveal(root)
+const locale = useSiteLocale()
+const generalCopy = computed(() => generalUiCopy(locale.value))
 </script>
 
 <template>
-  <section ref="root" class="how sm-section">
-    <h2 class="sm-section__title sm-reveal">{{ heading }}</h2>
-    <ol class="how__grid">
-      <li
-        v-for="(step, i) in steps"
-        :key="i"
-        class="how__card sm-reveal"
-        :style="{ transitionDelay: `${i * 70}ms` }"
-      >
-        <span class="how__title">{{ step.title }}</span>
-        <p class="how__desc">{{ step.desc }}</p>
-      </li>
-    </ol>
+  <section class="hd-how">
+    <div class="hd-how-header">
+      <h2 class="hd-how-title">{{ heading }}</h2>
+    </div>
+
+    <div class="hd-how-grid">
+      <div v-for="(step, i) in steps" :key="i" class="hd-how-card">
+        <div class="hd-how-n">
+          <span>0{{ i + 1 }}</span>
+        </div>
+        <div class="hd-how-content">
+          <h3 class="hd-how-card-title">{{ step.title }}</h3>
+          <p class="hd-how-desc">{{ step.desc }}</p>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
 <style scoped>
-.how__grid {
-  list-style: none;
-  margin: 1.75rem 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.85rem;
+.hd-how {
+  padding: 48px var(--gut);
+  border-bottom: 1px solid var(--line2);
+  background: var(--bg);
 }
 
-@media (min-width: 768px) {
-  .how__grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-  }
+.hd-how-header {
+  margin-bottom: 28px;
 }
 
-.how__card {
+.hd-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  color: var(--spot);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.hd-how-title {
+  font-family: var(--disp);
+  font-weight: 900;
+  font-size: clamp(26px, 3.5vw, 44px);
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  line-height: 1.05;
   margin: 0;
-  padding: 1.35rem 1.25rem 1.4rem;
-  border-radius: var(--sm-radius);
-  background: var(--sm-panel);
-  box-shadow: inset 0 0 0 1px var(--sm-border);
+}
+
+.hd-how-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--line2);
+  background: var(--bg);
+}
+
+.hd-how-card {
+  padding: 24px 20px;
+  border-right: 1px solid var(--line);
+  background: var(--panel);
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
-  transition:
-    box-shadow 0.25s var(--sm-ease),
-    transform 0.25s var(--sm-ease);
+  gap: 14px;
+  transition: background-color 0.12s ease;
 }
 
-.how__card:hover {
-  box-shadow: inset 0 0 0 1px var(--sm-border-strong);
-  transform: translateY(-2px);
+.hd-how-card:last-child {
+  border-right: 0;
 }
 
-.how__title {
-  font-family: var(--sm-font-sans);
-  font-size: 1.05rem;
-  font-weight: 600;
+.hd-how-card:hover {
+  background: color-mix(in srgb, var(--spot) 4%, var(--panel));
+}
+
+.hd-how-n span {
+  font-family: var(--disp);
+  font-weight: 900;
+  font-size: 34px;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  color: var(--line2);
+  transition: color 0.12s ease;
+}
+
+.hd-how-card:hover .hd-how-n span {
+  color: var(--spot);
+}
+
+.hd-how-card-title {
+  font-family: var(--disp);
+  font-weight: 800;
+  font-size: 17px;
   letter-spacing: -0.02em;
-  color: var(--sm-text);
+  color: var(--ink);
+  margin: 0 0 6px;
 }
 
-.how__desc {
+.hd-how-desc {
+  font-family: var(--body);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--dim);
   margin: 0;
-  font-size: 0.92rem;
-  line-height: 1.55;
-  color: var(--sm-text-muted);
+}
+
+@media (max-width: 860px) {
+  .hd-how-grid {
+    grid-template-columns: 1fr;
+  }
+  .hd-how-card {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .hd-how-card:last-child {
+    border-bottom: 0;
+  }
 }
 </style>

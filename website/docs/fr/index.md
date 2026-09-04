@@ -23,6 +23,19 @@ description: "StrokeMouse est un outil de gestes souris et trackpad pour macOS. 
   :items="['Exécution locale', 'Sans télémétrie', 'Open source AGPL', 'macOS 14+']"
 />
 
+<ScreenshotCarousel
+  heading="Écrans du produit"
+  description="Bibliothèque de gestes, test, réglages et autorisations."
+  :shots="[
+    { src: '/screenshots/1.png', alt: 'Liste des gestes' },
+    { src: '/screenshots/2.png', alt: 'Test de geste' },
+    { src: '/screenshots/3.png', alt: 'Réglages généraux' },
+    { src: '/screenshots/4.png', alt: 'Autorisations' },
+    { src: '/screenshots/5.png', alt: 'Enregistrement du trait' },
+    { src: '/screenshots/6.png', alt: 'Portée d’application' },
+  ]"
+/>
+
 <HowItWorks
   heading="Votre premier geste en trois étapes"
   :steps="[
@@ -50,20 +63,6 @@ description: "StrokeMouse est un outil de gestes souris et trackpad pour macOS. 
 <GestureTiles
   heading="Gestes souris par défaut"
   lead="Des traits utiles dès l’installation, entièrement personnalisables."
-/>
-
-
-<ScreenshotCarousel
-  heading="Écrans du produit"
-  description="Bibliothèque de gestes, test, réglages et autorisations."
-  :shots="[
-    { src: '/screenshots/1.png', alt: 'Liste des gestes' },
-    { src: '/screenshots/2.png', alt: 'Test de geste' },
-    { src: '/screenshots/3.png', alt: 'Réglages généraux' },
-    { src: '/screenshots/4.png', alt: 'Autorisations' },
-    { src: '/screenshots/5.png', alt: 'Enregistrement du trait' },
-    { src: '/screenshots/6.png', alt: 'Portée d’application' },
-  ]"
 />
 
 <HomeCta

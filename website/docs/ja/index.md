@@ -23,6 +23,19 @@ description: "StrokeMouse は macOS のマウス／トラックパッドジェ�
   :items="['ローカル実行', 'テレメトリなし', 'オープンソース AGPL', 'macOS 14+']"
 />
 
+<ScreenshotCarousel
+  heading="製品画面"
+  description="ジェスチャライブラリ、テスト、設定、権限。"
+  :shots="[
+    { src: '/screenshots/1.png', alt: 'ジェスチャ設定一覧' },
+    { src: '/screenshots/2.png', alt: 'ジェスチャテスト' },
+    { src: '/screenshots/3.png', alt: '一般設定' },
+    { src: '/screenshots/4.png', alt: '権限' },
+    { src: '/screenshots/5.png', alt: '軌跡の記録' },
+    { src: '/screenshots/6.png', alt: 'アプリ範囲' },
+  ]"
+/>
+
 <HowItWorks
   heading="3 ステップで最初のジェスチャ"
   :steps="[
@@ -50,20 +63,6 @@ description: "StrokeMouse は macOS のマウス／トラックパッドジェ�
 <GestureTiles
   heading="デフォルトのマウス描画"
   lead="インストール直後から使える軌跡。すべてカスタマイズできます。"
-/>
-
-
-<ScreenshotCarousel
-  heading="製品画面"
-  description="ジェスチャライブラリ、テスト、設定、権限。"
-  :shots="[
-    { src: '/screenshots/1.png', alt: 'ジェスチャ設定一覧' },
-    { src: '/screenshots/2.png', alt: 'ジェスチャテスト' },
-    { src: '/screenshots/3.png', alt: '一般設定' },
-    { src: '/screenshots/4.png', alt: '権限' },
-    { src: '/screenshots/5.png', alt: '軌跡の記録' },
-    { src: '/screenshots/6.png', alt: 'アプリ範囲' },
-  ]"
 />
 
 <HomeCta

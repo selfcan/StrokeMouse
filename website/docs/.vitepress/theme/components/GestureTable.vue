@@ -3,9 +3,7 @@ import GestureStrokeCanvas from './GestureStrokeCanvas.vue'
 import { GESTURE_PATHS } from '../gesturePaths'
 
 export interface GestureRow {
-  /** Key into GESTURE_PATHS for canvas animation */
   path: string
-  /** @deprecated unused — canvas only */
   stroke?: string
   action: string
   note?: string
@@ -20,12 +18,14 @@ defineProps<{
 </script>
 
 <template>
-  <section class="gesture-table">
-    <header v-if="heading || subheading" class="gesture-table__header">
-      <p v-if="subheading" class="gesture-table__kicker">{{ subheading }}</p>
-      <h2 v-if="heading" class="gesture-table__heading">{{ heading }}</h2>
+  <section class="hd-gesture-table">
+    <header v-if="heading || subheading" class="hd-table-header">
+      <div v-if="subheading" class="hd-table-kicker">
+        <span>{{ subheading }}</span>
+      </div>
+      <h2 v-if="heading" class="hd-table-heading">{{ heading }}</h2>
     </header>
-    <div class="gesture-table__wrap">
+    <div class="hd-table-wrap">
       <table>
         <thead>
           <tr>
@@ -40,7 +40,10 @@ defineProps<{
               <GestureStrokeCanvas
                 v-if="GESTURE_PATHS[row.path]"
                 :points="GESTURE_PATHS[row.path]"
-                :delay-ms="i * 180"
+                :delay-ms="i * 150"
+                :width="64"
+                :height="48"
+                :line-width="2.2"
               />
             </td>
             <td class="action-cell">{{ row.action }}</td>
@@ -53,100 +56,98 @@ defineProps<{
 </template>
 
 <style scoped>
-.gesture-table {
-  margin: 3rem 0 2rem;
+.hd-gesture-table {
+  margin: 2.5rem 0 2rem;
 }
 
-.gesture-table__header {
-  margin-bottom: 1.25rem;
+.hd-table-header {
+  margin-bottom: 1rem;
 }
 
-.gesture-table__kicker {
-  margin: 0 0 0.4rem;
-  font-family: var(--sm-font-mono);
-  font-size: 12px;
-  letter-spacing: 0.1em;
+.hd-table-kicker {
+  display: flex;
+  align-items: center;
+  color: var(--spot);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--sm-accent);
+  margin-bottom: 8px;
 }
 
-.gesture-table__heading {
+.hd-table-heading {
   margin: 0;
-  font-family: var(--sm-font-mono);
-  font-size: 1.45rem;
-  font-weight: 600;
-  color: var(--sm-text);
+  font-family: var(--disp);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--ink);
 }
 
-/* Flush table — no empty pocket above/below cells */
-.gesture-table__wrap {
-  margin: 0;
-  padding: 0;
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--sm-panel);
-  box-shadow: inset 0 0 0 1px var(--sm-border);
-  line-height: normal;
+.hd-table-wrap {
+  border: 1px solid var(--line2);
+  background: var(--panel);
+  overflow-x: auto;
 }
 
 table {
   width: 100%;
   margin: 0;
   border-collapse: collapse;
-  border-spacing: 0;
-  font-size: 0.92rem;
+  font-size: 13.5px;
 }
 
 th,
 td {
-  text-align: left;
-  margin: 0;
-  border: none;
-  border-bottom: 1px solid var(--sm-border);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
   vertical-align: middle;
+  text-align: left;
 }
 
 th {
-  padding: 0.7rem 1rem;
-  font-family: var(--sm-font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--sm-accent);
-  background: color-mix(in srgb, var(--sm-accent) 12%, var(--sm-bg-elevated));
+  color: var(--ink);
+  background: color-mix(in srgb, var(--panel) 90%, black);
+  border-bottom: 1px solid var(--line2);
 }
 
 th.col-preview {
-  width: 5.5rem;
+  width: 72px;
   text-align: center;
-}
-
-td {
-  padding: 0.55rem 1rem;
-  background: transparent;
 }
 
 tr:last-child td {
   border-bottom: none;
 }
 
-.stroke-cell {
-  width: 5.5rem;
-  text-align: center;
-  padding: 0.45rem 0.65rem !important;
+tr:nth-child(2n) td {
+  background: color-mix(in srgb, var(--bg) 40%, transparent);
 }
 
-.stroke-cell :deep(.stroke-canvas) {
+.stroke-cell {
+  width: 72px;
+  text-align: center;
+  padding: 8px !important;
+}
+
+.stroke-cell :deep(canvas) {
   margin: 0 auto;
+  display: block;
 }
 
 .action-cell {
-  color: var(--sm-text);
+  color: var(--ink);
+  font-weight: 500;
 }
 
 .note {
-  color: var(--sm-text-muted);
-  font-size: 0.88rem;
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 11.5px;
   white-space: nowrap;
 }
 

@@ -23,6 +23,19 @@ description: "StrokeMouse는 macOS 마우스·트랙패드 제스처 도구입�
   :items="['로컬 실행', '원격 측정 없음', '오픈 소스 AGPL', 'macOS 14+']"
 />
 
+<ScreenshotCarousel
+  heading="제품 화면"
+  description="제스처 라이브러리, 테스트, 설정, 권한."
+  :shots="[
+    { src: '/screenshots/1.png', alt: '제스처 구성 목록' },
+    { src: '/screenshots/2.png', alt: '제스처 테스트' },
+    { src: '/screenshots/3.png', alt: '일반 설정' },
+    { src: '/screenshots/4.png', alt: '권한' },
+    { src: '/screenshots/5.png', alt: '궤적 녹음' },
+    { src: '/screenshots/6.png', alt: '앱 범위' },
+  ]"
+/>
+
 <HowItWorks
   heading="세 단계로 첫 제스처"
   :steps="[
@@ -50,20 +63,6 @@ description: "StrokeMouse는 macOS 마우스·트랙패드 제스처 도구입�
 <GestureTiles
   heading="기본 마우스 그리기 제스처"
   lead="설치 직후 바로 쓰는 궤적, 전부 직접 바꿀 수 있습니다."
-/>
-
-
-<ScreenshotCarousel
-  heading="제품 화면"
-  description="제스처 라이브러리, 테스트, 설정, 권한."
-  :shots="[
-    { src: '/screenshots/1.png', alt: '제스처 구성 목록' },
-    { src: '/screenshots/2.png', alt: '제스처 테스트' },
-    { src: '/screenshots/3.png', alt: '일반 설정' },
-    { src: '/screenshots/4.png', alt: '권한' },
-    { src: '/screenshots/5.png', alt: '궤적 녹음' },
-    { src: '/screenshots/6.png', alt: '앱 범위' },
-  ]"
 />
 
 <HomeCta

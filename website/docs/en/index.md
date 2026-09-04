@@ -23,6 +23,19 @@ description: "StrokeMouse is a macOS mouse and trackpad gesture tool. Draw with 
   :items="['Local-first', 'No telemetry', 'Open source AGPL', 'macOS 14+']"
 />
 
+<ScreenshotCarousel
+  heading="Product screens"
+  description="Gesture library, testing, settings, and permissions."
+  :shots="[
+    { src: '/screenshots/1.png', alt: 'Gesture list' },
+    { src: '/screenshots/2.png', alt: 'Gesture test' },
+    { src: '/screenshots/3.png', alt: 'General settings' },
+    { src: '/screenshots/4.png', alt: 'Permissions' },
+    { src: '/screenshots/5.png', alt: 'Record stroke' },
+    { src: '/screenshots/6.png', alt: 'App scope' },
+  ]"
+/>
+
 <HowItWorks
   heading="Your first gesture in three steps"
   :steps="[
@@ -50,19 +63,6 @@ description: "StrokeMouse is a macOS mouse and trackpad gesture tool. Draw with 
 <GestureTiles
   heading="Default mouse-draw gestures"
   lead="Useful strokes out of the box, fully customizable."
-/>
-
-<ScreenshotCarousel
-  heading="Product screens"
-  description="Gesture library, testing, settings, and permissions."
-  :shots="[
-    { src: '/screenshots/1.png', alt: 'Gesture list' },
-    { src: '/screenshots/2.png', alt: 'Gesture test' },
-    { src: '/screenshots/3.png', alt: 'General settings' },
-    { src: '/screenshots/4.png', alt: 'Permissions' },
-    { src: '/screenshots/5.png', alt: 'Record stroke' },
-    { src: '/screenshots/6.png', alt: 'App scope' },
-  ]"
 />
 
 <HomeCta

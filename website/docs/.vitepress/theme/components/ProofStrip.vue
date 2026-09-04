@@ -1,91 +1,202 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useReveal } from '../composables/useReveal'
+import { computed, onMounted, ref } from 'vue'
+import { GITHUB_REPO } from '../constants'
+import { showcaseCopy, useSiteLocale } from '../i18n'
 
 defineProps<{
-  items: string[]
+  items?: string[]
 }>()
 
-const root = ref<HTMLElement | null>(null)
-useReveal(root)
+const locale = useSiteLocale()
+const stars = ref('2,800+')
+const sc = computed(() => showcaseCopy(locale.value))
+
+onMounted(async () => {
+  try {
+    const cached = sessionStorage.getItem('sm_gh_stars')
+    if (cached) {
+      stars.value = cached
+    } else {
+      const res = await fetch('https://api.github.com/repos/Licoy/StrokeMouse')
+      if (res.ok) {
+        const data = await res.json()
+        if (typeof data.stargazers_count === 'number') {
+          stars.value = Number(data.stargazers_count).toLocaleString()
+        }
+      }
+    }
+  } catch {}
+})
 </script>
 
 <template>
-  <section ref="root" class="proof-strip sm-reveal" aria-label="Product facts">
-    <div class="proof-strip__inner">
-      <template v-for="(item, i) in items" :key="i">
-        <span class="proof-strip__item">{{ item }}</span>
-        <span v-if="i < items.length - 1" class="proof-strip__dot" aria-hidden="true" />
-      </template>
+  <div class="sm-strip-wrap">
+    <!-- ── 4-Column Stats Strip ── -->
+    <div class="strip">
+      <a class="stat" :href="GITHUB_REPO" target="_blank" rel="noopener">
+        <b>{{ stars }}</b>
+        <span>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 2.6l2.9 5.9 6.5.95-4.7 4.6 1.1 6.45L12 17.45 6.2 20.5l1.1-6.45-4.7-4.6 6.5-.95z"
+            />
+          </svg>
+          {{ sc.stripStars }} <i class="live" />
+        </span>
+      </a>
+
+      <div class="stat">
+        <b>34+</b>
+        <span>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            />
+          </svg>
+          {{ sc.stripGestures }}
+        </span>
+      </div>
+
+      <div class="stat">
+        <b>0.8ms</b>
+        <span>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 3v10m0 0l-4-4m4 4l4-4M4 17v3h16v-3"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="square"
+            />
+          </svg>
+          {{ sc.stripLatency }}
+        </span>
+      </div>
+
+      <div class="stat">
+        <b>macOS 14+</b>
+        <span>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M4 6l6 6-6 6M13 18h7"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="square"
+            />
+          </svg>
+          {{ sc.stripChips }}
+        </span>
+      </div>
     </div>
-  </section>
+  </div>
 </template>
 
 <style scoped>
-.proof-strip {
-  margin: 0.75rem 0 0.25rem;
-  border-top: 1px solid var(--sm-border);
-  border-bottom: 1px solid var(--sm-border);
-  /* Fixed row height + flex center = true vertical centering */
-  height: 3rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-}
-
-.proof-strip__inner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
+.sm-strip-wrap {
   width: 100%;
-  padding: 0 0.75rem;
+}
+
+/* ── Strip (4 columns) ── */
+.strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--line2);
+  border-bottom: 1px solid var(--line2);
+  background: var(--bg);
+}
+
+.stat {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  text-decoration: none;
+  padding: 22px var(--gut) 24px;
+  border-right: 1px solid var(--line);
   box-sizing: border-box;
-  /* Match parent height so children center against full strip */
-  min-height: 100%;
+  transition: background-color 0.12s ease;
 }
 
-.proof-strip__item {
-  display: inline-flex;
+.stat:last-child {
+  border-right: 0;
+}
+
+.stat:hover {
+  background: color-mix(in srgb, var(--spot) 5%, transparent);
+}
+
+.stat b {
+  display: block;
+  font-family: var(--disp);
+  font-weight: 900;
+  font-size: clamp(24px, 2.8vw, 36px);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat span {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  height: 1.25rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  line-height: 1.25rem;
-  color: var(--sm-text-muted);
-  letter-spacing: -0.01em;
-  white-space: nowrap;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--dim);
+  font-family: var(--body);
+  font-size: 11.5px;
 }
 
-.proof-strip__dot {
+.stat:hover span {
+  color: var(--ink);
+}
+
+.stat .ic {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  fill: currentColor;
+  stroke: currentColor;
+  color: var(--spot);
+  opacity: 0.9;
+}
+
+.stat .ic [fill="none"] {
+  fill: none;
+}
+
+.stat i.live {
+  width: 6px;
+  height: 6px;
+  background: var(--green);
   display: inline-block;
-  width: 3px;
-  height: 3px;
-  margin: 0 0.85rem;
-  border-radius: 50%;
-  background: var(--sm-text-faint);
-  opacity: 0.55;
-  flex-shrink: 0;
-  /* Optical center with text cap-height */
-  align-self: center;
 }
 
-@media (max-width: 639px) {
-  .proof-strip {
-    height: auto;
-    min-height: 3rem;
-    padding: 0.65rem 0;
+/* Responsive */
+@media (max-width: 900px) {
+  .strip {
+    grid-template-columns: 1fr 1fr;
   }
-
-  .proof-strip__inner {
-    gap: 0.45rem 0.85rem;
+  .strip .stat:nth-child(2n) {
+    border-right: 0;
   }
+  .strip .stat:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--line);
+  }
+}
 
-  .proof-strip__dot {
-    display: none;
+@media (max-width: 560px) {
+  .strip {
+    grid-template-columns: 1fr;
+  }
+  .strip .stat {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .strip .stat:last-child {
+    border-bottom: 0;
   }
 }
 </style>

@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import GestureStrokeCanvas from './GestureStrokeCanvas.vue'
 import { GESTURE_PATHS } from '../gesturePaths'
 import { DEFAULT_GESTURE_DEMOS } from '../defaultGestureDemos'
-import { gestureName, gestureUi, useSiteLocale } from '../i18n'
-import { useReveal } from '../composables/useReveal'
+import { generalUiCopy, gestureName, gestureUi, useSiteLocale } from '../i18n'
 
 defineProps<{
   heading: string
@@ -12,6 +11,7 @@ defineProps<{
 }>()
 
 const locale = useSiteLocale()
+const generalCopy = computed(() => generalUiCopy(locale.value))
 
 const tiles = computed(() =>
   DEFAULT_GESTURE_DEMOS.map((d) => ({
@@ -21,107 +21,167 @@ const tiles = computed(() =>
     points: GESTURE_PATHS[d.path] ?? [],
   })),
 )
-
-const root = ref<HTMLElement | null>(null)
-useReveal(root)
 </script>
 
 <template>
-  <section ref="root" class="gestures sm-section">
-    <header class="gestures__head sm-reveal">
-      <h2 class="sm-section__title">{{ heading }}</h2>
-      <p v-if="lead" class="sm-section__lead">{{ lead }}</p>
-    </header>
+  <section class="hd-presets">
+    <div class="hd-presets-header">
+      <h2 class="hd-presets-title">{{ heading }}</h2>
+      <p v-if="lead" class="hd-presets-lead">{{ lead }}</p>
+    </div>
 
-    <!-- 2-row grid · no horizontal scroll -->
-    <div class="gestures__grid sm-reveal">
-      <article v-for="(tile, i) in tiles" :key="tile.path" class="gestures__tile">
-        <div class="gestures__canvas-wrap">
+    <div class="hd-presets-grid">
+      <article v-for="(tile, i) in tiles" :key="tile.path" class="hd-tile">
+        <div class="hd-tile-canvas">
           <GestureStrokeCanvas
             :points="tile.points"
-            :width="148"
-            :height="100"
-            :delay-ms="i * 160"
-            :line-width="2.4"
-            :start-radius="3"
+            :width="140"
+            :height="95"
+            :delay-ms="i * 120"
+            :line-width="2.6"
+            :start-radius="4"
           />
         </div>
-        <h3 class="gestures__action">{{ tile.action }}</h3>
-        <p class="gestures__trigger">{{ tile.trigger }}</p>
+        <div class="hd-tile-info">
+          <span class="hd-tile-idx">#0{{ i + 1 }}</span>
+          <h3 class="hd-tile-action">{{ tile.action }}</h3>
+          <span class="hd-tile-trigger">{{ tile.trigger }}</span>
+        </div>
       </article>
     </div>
   </section>
 </template>
 
 <style scoped>
-.gestures__grid {
+.hd-presets {
+  padding: 48px var(--gut);
+  border-bottom: 1px solid var(--line2);
+  background: var(--bg);
+}
+
+.hd-presets-header {
+  margin-bottom: 28px;
+}
+
+.hd-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  color: var(--spot);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.hd-presets-title {
+  font-family: var(--disp);
+  font-weight: 900;
+  font-size: clamp(26px, 3.5vw, 44px);
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  line-height: 1.05;
+  margin: 0;
+}
+
+.hd-presets-lead {
+  color: var(--dim);
+  font-size: 15px;
+  line-height: 1.7;
+  max-width: 60ch;
+  margin: 12px 0 0;
+}
+
+.hd-presets-grid {
   display: grid;
-  /* Mobile: 2 cols → multi-row, no x-scroll */
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-  overflow: visible;
-  width: 100%;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--line2);
+  background: var(--bg);
 }
 
-/* Tablet / desktop: 4 cols → 7 items = 2 rows (4 + 3) */
-@media (min-width: 720px) {
-  .gestures__grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.85rem;
-  }
-}
-
-.gestures__tile {
-  min-width: 0;
-  padding: 0.9rem 0.85rem 1rem;
-  border-radius: var(--sm-radius);
-  background: var(--sm-panel);
-  box-shadow: inset 0 0 0 1px var(--sm-border);
-  transition:
-    box-shadow 0.25s var(--sm-ease),
-    transform 0.25s var(--sm-ease);
-}
-
-.gestures__tile:hover {
-  box-shadow: inset 0 0 0 1px var(--sm-border-strong);
-  transform: translateY(-2px);
-}
-
-.gestures__canvas-wrap {
+.hd-tile {
+  padding: 18px 16px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
   display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  transition: background-color 0.12s ease;
+  box-sizing: border-box;
+}
+
+.hd-tile:nth-child(4n) {
+  border-right: 0;
+}
+
+.hd-tile:hover {
+  background: color-mix(in srgb, var(--spot) 5%, var(--panel));
+}
+
+.hd-tile-canvas {
+  display: flex;
+  align-items: center;
   justify-content: center;
-  margin-bottom: 0.65rem;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--sm-bg) 70%, var(--sm-bg-soft));
+  background: var(--bg);
+  border: 1px solid var(--line2);
+  height: 105px;
   overflow: hidden;
 }
 
-.gestures__canvas-wrap :deep(canvas) {
-  max-width: 100%;
-  height: auto;
+.hd-tile-canvas :deep(canvas) {
+  display: block;
 }
 
-.gestures__action {
-  margin: 0 0 0.2rem;
-  font-family: var(--sm-font-sans);
-  font-size: 0.9rem;
-  font-weight: 600;
+.hd-tile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hd-tile-idx {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--faint);
+  text-transform: uppercase;
+}
+
+.hd-tile-action {
+  font-family: var(--disp);
+  font-weight: 800;
+  font-size: 14.5px;
   letter-spacing: -0.02em;
-  color: var(--sm-text);
-  line-height: 1.3;
-  overflow-wrap: anywhere;
+  color: var(--ink);
+  margin: 0;
 }
 
-.gestures__trigger {
-  margin: 0;
-  font-size: 0.78rem;
-  color: var(--sm-text-faint);
+.hd-tile-trigger {
+  font-family: var(--body);
+  font-size: 11px;
+  color: var(--spot);
   font-weight: 500;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .gestures__tile:hover {
-    transform: none;
+@media (max-width: 960px) {
+  .hd-presets-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .hd-tile:nth-child(4n) {
+    border-right: 1px solid var(--line);
+  }
+  .hd-tile:nth-child(2n) {
+    border-right: 0;
+  }
+}
+
+@media (max-width: 540px) {
+  .hd-presets-grid {
+    grid-template-columns: 1fr;
+  }
+  .hd-tile {
+    border-right: 0 !important;
   }
 }
 </style>
