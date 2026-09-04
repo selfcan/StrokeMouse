@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { GITHUB_REPO } from '../constants'
+import { computed } from 'vue'
+import { PRESET_ACTION_COUNT } from '../constants'
 import { showcaseCopy, useSiteLocale } from '../i18n'
 
 defineProps<{
@@ -8,43 +8,13 @@ defineProps<{
 }>()
 
 const locale = useSiteLocale()
-const stars = ref('2,800+')
 const sc = computed(() => showcaseCopy(locale.value))
-
-onMounted(async () => {
-  try {
-    const cached = sessionStorage.getItem('sm_gh_stars')
-    if (cached) {
-      stars.value = cached
-    } else {
-      const res = await fetch('https://api.github.com/repos/Licoy/StrokeMouse')
-      if (res.ok) {
-        const data = await res.json()
-        if (typeof data.stargazers_count === 'number') {
-          stars.value = Number(data.stargazers_count).toLocaleString()
-        }
-      }
-    }
-  } catch {}
-})
 </script>
 
 <template>
   <div class="sm-strip-wrap">
     <!-- ── 4-Column Stats Strip ── -->
     <div class="strip">
-      <a class="stat" :href="GITHUB_REPO" target="_blank" rel="noopener">
-        <b>{{ stars }}</b>
-        <span>
-          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M12 2.6l2.9 5.9 6.5.95-4.7 4.6 1.1 6.45L12 17.45 6.2 20.5l1.1-6.45-4.7-4.6 6.5-.95z"
-            />
-          </svg>
-          {{ sc.stripStars }} <i class="live" />
-        </span>
-      </a>
-
       <div class="stat">
         <b>34+</b>
         <span>
@@ -57,6 +27,22 @@ onMounted(async () => {
             />
           </svg>
           {{ sc.stripGestures }}
+        </span>
+      </div>
+
+      <div class="stat">
+        <b>{{ PRESET_ACTION_COUNT }}</b>
+        <span>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M4 6h16M4 12h16M4 18h10"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="square"
+            />
+          </svg>
+          {{ sc.stripPresets }}
         </span>
       </div>
 
@@ -165,13 +151,6 @@ onMounted(async () => {
 
 .stat .ic [fill="none"] {
   fill: none;
-}
-
-.stat i.live {
-  width: 6px;
-  height: 6px;
-  background: var(--green);
-  display: inline-block;
 }
 
 /* Responsive */

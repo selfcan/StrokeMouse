@@ -60,7 +60,7 @@ export const THEME_MODE_COPY: Record<SiteLocale, ThemeModeCopy> = {
 }
 
 export interface ShowcaseCopy {
-  stripStars: string
+  stripPresets: string
   stripGestures: string
   stripLatency: string
   stripChips: string
@@ -85,7 +85,7 @@ export interface ShowcaseCopy {
 
 export const SHOWCASE_COPY: Record<SiteLocale, ShowcaseCopy> = {
   'zh-Hans': {
-    stripStars: 'GitHub 关注',
+    stripPresets: '开箱预设动作',
     stripGestures: '类原生手势支持',
     stripLatency: '原生识别延迟',
     stripChips: 'Apple Silicon 与 Intel',
@@ -109,7 +109,7 @@ export const SHOWCASE_COPY: Record<SiteLocale, ShowcaseCopy> = {
       '真实运行状态：原生 Swift 编写，无后台遥测，亚毫秒级低延迟响应。点击左侧规则，实时查看匹配与事件派发。',
   },
   'zh-Hant': {
-    stripStars: 'GitHub 關注',
+    stripPresets: '開箱預設動作',
     stripGestures: '類原生手勢支援',
     stripLatency: '原生辨識延遲',
     stripChips: 'Apple Silicon 與 Intel',
@@ -133,7 +133,7 @@ export const SHOWCASE_COPY: Record<SiteLocale, ShowcaseCopy> = {
       '真實執行狀態：原生 Swift 編寫，無背景遙測，次毫秒級低延遲回應。點擊左側規則，即時查看比對與事件發送。',
   },
   en: {
-    stripStars: 'GitHub Stars',
+    stripPresets: 'Built-in Presets',
     stripGestures: 'Gestures Supported',
     stripLatency: 'Recognition Latency',
     stripChips: 'Apple Silicon & Intel',
@@ -157,7 +157,7 @@ export const SHOWCASE_COPY: Record<SiteLocale, ShowcaseCopy> = {
       'A real session: native Swift input hook, zero telemetry, sub-millisecond recognition. Click an action in the sidebar to inspect real-time stroke recognition.',
   },
   ko: {
-    stripStars: 'GitHub 스타',
+    stripPresets: '기본 제공 동작',
     stripGestures: '지원되는 제스처',
     stripLatency: '인식 지연 시간',
     stripChips: 'Apple Silicon 및 Intel',
@@ -181,7 +181,7 @@ export const SHOWCASE_COPY: Record<SiteLocale, ShowcaseCopy> = {
       '실제 세션: 기본 Swift 입력 후크, 제로 원격 측정, 서브밀리초 응답. 사이드바 항목을 클릭하여 실시간 인식과 키 발송을 확인하세요.',
   },
   ja: {
-    stripStars: 'GitHub スター',
+    stripPresets: 'プリセット操作',
     stripGestures: 'ジェスチャ対応数',
     stripLatency: 'ネイティブ認識遅延',
     stripChips: 'Apple Silicon および Intel',
@@ -205,7 +205,7 @@ export const SHOWCASE_COPY: Record<SiteLocale, ShowcaseCopy> = {
       '実際の実行セッション：ネイティブ Swift による入力フック、テレメトリなし、ミリ秒未満の応答。リアルタイム認識とキー送信を確認できます。',
   },
   ru: {
-    stripStars: 'Звёзды на GitHub',
+    stripPresets: 'Готовые действия',
     stripGestures: 'Поддерживаемые жесты',
     stripLatency: 'Задержка распознавания',
     stripChips: 'Apple Silicon и Intel',
@@ -229,7 +229,7 @@ export const SHOWCASE_COPY: Record<SiteLocale, ShowcaseCopy> = {
       'Нативная сессия: перехват событий на Swift, отсутствие телеметрии, задержка менее миллисекунды. Нажмите на жест для проверки распознавания.',
   },
   fr: {
-    stripStars: 'Étoiles GitHub',
+    stripPresets: 'Actions prédéfinies',
     stripGestures: 'Gestes pris en charge',
     stripLatency: 'Latence de détection',
     stripChips: 'Apple Silicon et Intel',
